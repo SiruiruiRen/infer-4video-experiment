@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFER - 4-Video Experiment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="alert-container"></div>
+    
+    <!-- Progress Bar (hidden on login page) -->
+    <div class="progress-container" id="progress-container" style="display: none;">
+        <div class="progress" style="height: 6px;">
+            <div class="progress-bar bg-primary" role="progressbar" id="study-progress" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div class="progress-text text-center mt-2">
+            <small class="text-muted" id="progress-text">Study Progress</small>
+        </div>
+    </div>
+
+    <!-- Page 1: Login/Resume -->
+    <div id="page-login" class="page-container">
+        <div class="main-container">
+            <div class="header">
+                <div class="row align-items-center">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 100px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 45px;">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        <h1 class="mb-0">INFER</h1>
+                        <p class="mb-0" style="font-size: 1.1rem;">4-Video Experiment</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-center">
+                            <h4>Enter Your Participant Code</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Create a code: First letter of mother's first name + birth month (2 digits) + birth year (2 digits).</p>
+                            <p class="text-muted small">Example: Mother named Anna, born in August 1995 → <strong>A0895</strong></p>
+                            
+                            <div class="mb-3">
+                                <label for="participant-code-input" class="form-label">Participant Code:</label>
+                                <input type="text" class="form-control" id="participant-code-input" placeholder="e.g., A0895" maxlength="20" autofocus>
+                            </div>
+                            
+                            <div id="resume-info" class="alert alert-info d-none">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span id="resume-message"></span>
+                            </div>
+                            
+                            <button id="login-button" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2: Pre-Survey -->
+    <div id="page-presurvey" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0">Pre-Survey</h1>
+                        <p class="mb-0">Please complete the pre-survey before starting</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="qualtrics-survey-section border rounded p-4 mb-4">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Pre-Survey</h6>
+                                        <p class="text-muted mb-3">Please complete the survey below. This takes about 5-10 minutes.</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="qualtrics-iframe-container">
+                                            <iframe id="pre-survey-iframe" src="" width="100%" height="1800px" style="border:none;"></iframe>
+                                        </div>
+                            </div>
+                                </div>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <small><i class="bi bi-check-circle me-1"></i><strong>Next Step:</strong> 
+                                    Complete the survey above, then click "Continue to Dashboard" below.</small>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button id="continue-after-presurvey" class="btn btn-success btn-lg">Continue to Dashboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 3: Dashboard -->
+    <div id="page-dashboard" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0">Video Dashboard</h1>
+                        <p class="mb-0" id="dashboard-subtitle">Welcome back, <span id="dashboard-participant-name"></span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-10">
+                    <!-- Progress Summary -->
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <h5>Your Progress</h5>
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div class="progress-bar bg-success" role="progressbar" id="dashboard-progress-bar" style="width: 0%">
+                                    <span id="dashboard-progress-text">0/4 Videos Completed</span>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-0">You have 2.5 weeks to complete all 4 videos</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Video Cards Grid -->
+                    <div class="row g-4" id="video-cards-container">
+                        <!-- Video cards will be dynamically generated -->
+                    </div>
+                    
+                    <!-- Post-Survey Button (shown when all videos complete) -->
+                    <div id="post-survey-section" class="card mt-4 d-none">
+                        <div class="card-body text-center">
+                            <h5 class="text-success"><i class="bi bi-check-circle-fill me-2"></i>All Videos Completed!</h5>
+                            <p>Please complete the final post-survey to finish the experiment.</p>
+                            <button id="start-post-survey" class="btn btn-success btn-lg">Start Post-Survey</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 4-7: Video Task Pages (4 videos) -->
+    <div id="page-video-task" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0" id="video-task-title">Video Task</h1>
+                        <p class="mb-0" id="video-task-subtitle">Analyze your teaching reflection and receive feedback</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Settings Panel -->
+                <div class="col-md-2">
+                    <div class="card">
+                        <div class="card-header">Settings</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Participant Code:</label>
+                                <input type="text" class="form-control" id="task-participant-code" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Video:</label>
+                                <input type="text" class="form-control" id="task-video-name" readonly>
+                            </div>
+                            
+                            <div class="language-toggle mb-3">
+                                <label>Language:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-en" checked>
+                                    <label class="form-check-label" for="task-lang-en">English</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-de">
+                                    <label class="form-check-label" for="task-lang-de">Deutsch</label>
+                                </div>
+                            </div>
+                            
+                            <button id="back-to-dashboard" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Panel -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Student Teacher Reflection</div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <textarea id="task-reflection-text" class="form-control flex-grow-1 mb-3" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
+                            
+                            <div class="input-actions mt-auto">
+                                <button id="task-clear-btn" class="btn btn-secondary">Clear</button>
+                                <div id="task-word-count-container" class="text-muted">
+                                    <span id="task-word-count">0</span> words
+                                </div>
+                                <button id="task-generate-btn" class="btn btn-primary">Generate Feedback</button>
+                                <button id="task-submit-final" class="btn btn-success btn-lg mt-2" style="display: none;">
+                                    <i class="bi bi-check-circle"></i> Submit Final Reflection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Panel -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span>Generated Feedback</span>
+                        </div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <div id="task-loading-spinner" class="loading-spinner">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="task-loading-text" class="loading-message mt-3 small text-muted"></div>
+                            </div>
+                            
+                            <!-- Percentage Explanation -->
+                            <div id="percentage-explanation" class="alert alert-info d-none mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Note:</strong> The percentages may add up to more than 100% because a single passage can receive multiple codes (Description, Explanation, and Prediction).
+                            </div>
+                            
+                            <div id="task-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
+                                <ul class="nav nav-tabs feedback-tabs d-none" id="task-feedback-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="task-extended-tab" data-bs-toggle="tab" data-bs-target="#task-feedback-extended-pane" type="button" role="tab">Extended</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="task-short-tab" data-bs-toggle="tab" data-bs-target="#task-feedback-short-pane" type="button" role="tab">Short</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="task-feedback-tab-content">
+                                    <div class="tab-pane fade show active" id="task-feedback-extended-pane" role="tabpanel">
+                                        <div id="task-feedback-extended" class="feedback-content">
+                                            <p class="text-muted">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="task-feedback-short-pane" role="tabpanel">
+                                        <div id="task-feedback-short" class="feedback-content">
+                                            <p class="text-muted">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto">
+                                <div class="feedback-options">
+                                    <button id="task-copy-btn" class="btn btn-outline-secondary">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                    <button id="task-revise-btn" class="btn btn-outline-info" style="display: none;">
+                                        <i class="bi bi-pencil-square"></i> Revise Reflection
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Definitions Section -->
+            <div class="definitions-section mt-4">
+                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#task-definitions-content" aria-expanded="false" role="button">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                                Learn the Key Concepts for Better Reflection
+                            </h5>
+                            <p class="mb-0 text-muted">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
+                        </div>
+                        <div class="expand-indicator">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse" id="task-definitions-content">
+                    <div class="definitions-grid">
+                        <div class="definition-card description-card">
+                            <div class="definition-icon">📝</div>
+                            <h6>Description</h6>
+                            <p>Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
+                        </div>
+                        <div class="definition-card explanation-card">
+                            <div class="definition-icon">🔍</div>
+                            <h6>Explanation</h6>
+                            <p>Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
+                        </div>
+                        <div class="definition-card prediction-card">
+                            <div class="definition-icon">🔮</div>
+                            <h6>Prediction</h6>
+                            <p>Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 8-11: Post-Video Surveys (4 surveys) -->
+    <div id="page-post-video-survey" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0" id="post-video-survey-title">Post-Video Survey</h1>
+                        <p class="mb-0" id="post-video-survey-subtitle">Please share your thoughts about this video</p>
+                    </div>
+                </div>
+            </div>
+                            
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="qualtrics-survey-section border rounded p-4 mb-4">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Post-Video Questionnaire</h6>
+                                        <p class="text-muted mb-3">Please complete the questionnaire below. This takes about 3-5 minutes.</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="qualtrics-iframe-container">
+                                            <iframe id="post-video-survey-iframe" src="" width="100%" height="1600px" style="border:none;"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <small><i class="bi bi-check-circle me-1"></i><strong>Next Step:</strong> 
+                                    Complete the questionnaire above, then click "Return to Dashboard" below.</small>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button id="continue-after-post-video-survey" class="btn btn-success btn-lg">Return to Dashboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 12: Post-Survey (Final) -->
+    <div id="page-postsurvey" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0">Final Post-Survey</h1>
+                        <p class="mb-0">Thank you for completing all videos!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="qualtrics-survey-section border rounded p-4 mb-4">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Final Post-Survey</h6>
+                                        <p class="text-muted mb-3">Please complete the final survey below. This takes about 10-15 minutes.</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="qualtrics-iframe-container">
+                                            <iframe id="post-survey-iframe" src="" width="100%" height="1800px" style="border:none;"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <small><i class="bi bi-check-circle me-1"></i><strong>Final Step:</strong> 
+                                    Complete the survey above, then click "Complete Study" below to finish.</small>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button id="complete-study" class="btn btn-success btn-lg">Complete Study</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 13: Thank You -->
+    <div id="page-thankyou" class="page-container d-none">
+        <div class="main-container">
+            <div class="header text-center">
+                <div class="position-relative">
+                    <div class="d-flex align-items-center position-absolute" style="top: 10px; left: 20px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                    </div>
+                    <div class="text-center pt-3">
+                        <h1 class="mb-0">Thank You!</h1>
+                        <p class="mb-0">Your participation is complete</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                            <h3 class="mt-4 mb-3">Study Complete!</h3>
+                            <p class="lead">Thank you for your time and thoughtful reflections.</p>
+                            <p>Your contributions help improve teacher education and feedback systems.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Feedback Style Preference Modal -->
+    <div class="modal fade" id="feedback-preference-modal" tabindex="-1" aria-labelledby="feedback-preference-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedback-preference-modal-label">Choose Your Preferred Feedback Style</h5>
+                </div>
+                <div class="modal-body">
+                    <p>We generate two types of feedback. Which would you like to see first?</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100 feedback-option-card" data-style="extended">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-journal-text text-primary mb-3" style="font-size: 2.5rem;"></i>
+                                    <h6>Extended Feedback</h6>
+                                    <p class="small text-muted">Detailed academic feedback with comprehensive analysis and educational theory references</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 feedback-option-card" data-style="short">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-card-text text-success mb-3" style="font-size: 2.5rem;"></i>
+                                    <h6>Short Feedback</h6>
+                                    <p class="small text-muted">Concise, easy-to-read feedback with key points and practical tips</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted small mt-3">You can switch between both styles anytime using the tabs after feedback is generated.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="select-extended-first">Start with Extended</button>
+                    <button type="button" class="btn btn-outline-success" id="select-short-first">Start with Short</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Submission Confirmation Modal -->
+    <div class="modal fade" id="final-submission-modal" tabindex="-1" aria-labelledby="final-submission-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="final-submission-modal-label">Confirm Final Submission</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <p>Are you sure you want to submit your final reflection? After submission, you won't be able to make any more changes to this task.</p>
+                    <p class="text-muted">You can continue revising your reflection until you're satisfied, then click this button when you're ready to move on.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Editing</button>
+                    <button type="button" class="btn btn-success" id="confirm-final-submission">Yes, Submit Final</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Usage Detection Modal -->
+    <div class="modal fade" id="ai-usage-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Tab Switch Detected
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="handleAIUsageResponse(true)">
+                        Yes, I used AI
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="handleAIUsageResponse(false)">
+                        No, I did not use AI
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <script>
+        setTimeout(() => {
+            if (typeof window.supabase === 'undefined' || !window.supabase) {
+                console.warn('⚠️ Primary Supabase CDN failed, trying backup...');
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = 'https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js';
+                fallbackScript.onload = () => {
+                    if (typeof window.supabase !== 'undefined') {
+                        console.log('✅ Supabase loaded from backup CDN');
+                    } else {
+                        console.error('❌ All Supabase CDN sources failed. Running in demo mode.');
+                    }
+                };
+                fallbackScript.onerror = () => {
+                    console.error('❌ Backup Supabase CDN also failed. Running in demo mode.');
+                };
+                document.head.appendChild(fallbackScript);
+            } else {
+                console.log('✅ Supabase library loaded successfully');
+            }
+        }, 1000);
+    </script>
+    <script src="app.js"></script>
+    
+</body>
+</html>

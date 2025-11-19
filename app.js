@@ -1,0 +1,1656 @@
+// INFER - 4-Video Experiment Version
+// Complete production-ready version with login, dashboard, progress tracking, and all surveys
+//
+// DATA COLLECTION:
+// - All binary classification results stored in Supabase database
+// - All user interactions (clicks, navigations) logged to Supabase
+// - Reflection data and feedback stored in Supabase
+// - Progress tracking in participant_progress table
+
+// Constants and configuration
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const CORS_PROXY_URL = isProduction 
+    ? 'https://tubingen-feedback-cors-proxy.onrender.com'
+    : 'http://localhost:3000';
+const OPENAI_API_URL = `${CORS_PROXY_URL}/api/openai/v1/chat/completions`;
+const model = 'gpt-4o';
+
+// ============================================================================
+// Supabase Configuration - UPDATE THESE FOR NEW DATABASE
+// ============================================================================
+const SUPABASE_URL = 'https://cvmzsljalmkrehfkqjtc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2bXpzbGphbG1rcmVoZmtxanRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1OTM5MzIsImV4cCI6MjA3OTE2OTkzMn0.0IxG1T574aCCH6pxfn8tgGrzw3XUuDKFPE8YQQkV9T4';
+// ============================================================================
+
+// Video Configuration - UPDATE WITH YOUR 4 VIDEOS
+const VIDEOS = [
+    { id: 'video1', name: 'Video 1: [Name]', link: 'VIDEO_LINK_1', password: 'PASSWORD_1' },
+    { id: 'video2', name: 'Video 2: [Name]', link: 'VIDEO_LINK_2', password: 'PASSWORD_2' },
+    { id: 'video3', name: 'Video 3: [Name]', link: 'VIDEO_LINK_3', password: 'PASSWORD_3' },
+    { id: 'video4', name: 'Video 4: [Name]', link: 'VIDEO_LINK_4', password: 'PASSWORD_4' }
+];
+
+// Qualtrics Survey Links - UPDATE WITH YOUR SURVEY LINKS
+const QUALTRICS_SURVEYS = {
+    pre: 'YOUR_PRE_SURVEY_LINK',
+    post_video_1: 'YOUR_POST_VIDEO_1_LINK',
+    post_video_2: 'YOUR_POST_VIDEO_2_LINK',
+    post_video_3: 'YOUR_POST_VIDEO_3_LINK',
+    post_video_4: 'YOUR_POST_VIDEO_4_LINK',
+    post: 'YOUR_FINAL_POST_SURVEY_LINK'
+};
+
+// Global state
+let currentPage = 'login';
+let currentLanguage = 'en';
+let userPreferredFeedbackStyle = 'extended';
+let currentSessionId = null;
+let supabase = null;
+let currentParticipant = null;
+let currentParticipantProgress = null;
+let currentVideoId = null;
+let currentTaskState = {
+    feedbackGenerated: false,
+    submitted: false,
+    currentReflectionId: null,
+    parentReflectionId: null,
+    revisionCount: 0,
+    currentFeedbackType: null,
+    currentFeedbackStartTime: null
+};
+
+// Tab switching detection
+let tabSwitchCount = 0;
+let lastHiddenTime = null;
+let hasAskedAboutAI = false;
+
+// Language translations (simplified for 4-video version)
+const translations = {
+    en: {
+        title: "INFER",
+        subtitle: "An intelligent feedback system for observing classroom videos",
+        loading_messages: [
+            "Please wait while the little elves create your feedback...",
+            "Almost there, we promise...",
+            "Computing the secret to the universe...",
+            "Still making progress, don't leave yet!",
+            "Grab a coffee and come back in a minute?"
+        ]
+    },
+    de: {
+        title: "INFER",
+        subtitle: "Ein intelligentes Feedback-System zur Beobachtung von Unterricht",
+        loading_messages: [
+            "Bitte warten Sie, während die kleinen Elfen Ihr Feedback erstellen...",
+            "Fast geschafft, wir versprechen es...",
+            "Das Geheimnis des Universums wird berechnet...",
+            "Immer noch Fortschritte, gehen Sie noch nicht!",
+            "Holen Sie sich einen Kaffee und kommen Sie in einer Minute wieder?"
+        ]
+    }
+};
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing INFER 4-video experiment version...');
+    
+    // Initialize Supabase
+    supabase = initSupabase();
+    if (supabase) {
+        verifySupabaseConnection(supabase);
+        currentSessionId = getOrCreateSessionId();
+    }
+    
+    initializeApp();
+});
+
+// Initialize app
+function initializeApp() {
+    setupEventListeners();
+    showPage('login');
+    
+    // Log session start
+    logEvent('session_start', {
+        entry_page: 'login',
+        user_agent: navigator.userAgent,
+        screen_width: window.screen.width,
+        screen_height: window.screen.height
+    });
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Login page
+    document.getElementById('login-button')?.addEventListener('click', handleLogin);
+    document.getElementById('participant-code-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    
+    // Pre-survey
+    document.getElementById('continue-after-presurvey')?.addEventListener('click', () => {
+        markPreSurveyComplete();
+        showPage('dashboard');
+    });
+    
+    // Dashboard
+    document.getElementById('start-post-survey')?.addEventListener('click', () => {
+        showPage('postsurvey');
+        loadSurvey('post');
+    });
+    
+    // Video task
+    document.getElementById('task-generate-btn')?.addEventListener('click', () => handleGenerateFeedback());
+    document.getElementById('task-clear-btn')?.addEventListener('click', () => handleClear());
+    document.getElementById('task-copy-btn')?.addEventListener('click', () => handleCopy());
+    document.getElementById('task-revise-btn')?.addEventListener('click', () => handleRevise());
+    document.getElementById('task-submit-final')?.addEventListener('click', () => handleFinalSubmission());
+    document.getElementById('back-to-dashboard')?.addEventListener('click', () => showPage('dashboard'));
+    document.getElementById('task-reflection-text')?.addEventListener('input', () => updateWordCount());
+    
+    // Language switchers
+    document.getElementById('task-lang-en')?.addEventListener('change', () => switchLanguage('en'));
+    document.getElementById('task-lang-de')?.addEventListener('change', () => switchLanguage('de'));
+    
+    // Feedback tabs
+    document.getElementById('task-extended-tab')?.addEventListener('click', () => {
+        if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
+            endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
+        }
+        startFeedbackViewing('extended', currentLanguage);
+    });
+    document.getElementById('task-short-tab')?.addEventListener('click', () => {
+        if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
+            endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
+        }
+        startFeedbackViewing('short', currentLanguage);
+    });
+    
+    // Post-video survey
+    document.getElementById('continue-after-post-video-survey')?.addEventListener('click', () => {
+        markVideoSurveyComplete();
+        showPage('dashboard');
+    });
+    
+    // Final submission modal
+    document.getElementById('confirm-final-submission')?.addEventListener('click', () => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('final-submission-modal'));
+        modal?.hide();
+        confirmFinalSubmission();
+    });
+    
+    // Feedback preference modal
+    document.getElementById('select-extended-first')?.addEventListener('click', () => {
+        userPreferredFeedbackStyle = 'extended';
+        const modal = bootstrap.Modal.getInstance(document.getElementById('feedback-preference-modal'));
+        modal?.hide();
+    });
+    document.getElementById('select-short-first')?.addEventListener('click', () => {
+        userPreferredFeedbackStyle = 'short';
+        const modal = bootstrap.Modal.getInstance(document.getElementById('feedback-preference-modal'));
+        modal?.hide();
+    });
+    
+    // Complete study
+    document.getElementById('complete-study')?.addEventListener('click', () => {
+        markPostSurveyComplete();
+        showPage('thankyou');
+    });
+    
+    // Tab switching detection
+    document.addEventListener('visibilitychange', handleTabSwitch);
+}
+
+// Tab switching detection
+function handleTabSwitch() {
+    if (document.hidden) {
+        lastHiddenTime = Date.now();
+        tabSwitchCount++;
+        logEvent('tab_hidden', {
+            tab_switch_count: tabSwitchCount,
+            current_page: currentPage,
+            video_id: currentVideoId,
+            timestamp: new Date().toISOString()
+        });
+    } else {
+        const timeAway = lastHiddenTime ? (Date.now() - lastHiddenTime) / 1000 : 0;
+        logEvent('tab_visible', {
+            tab_switch_count: tabSwitchCount,
+            time_away_seconds: timeAway,
+            current_page: currentPage,
+            video_id: currentVideoId,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (timeAway > 5 && currentPage === 'video-task' && !hasAskedAboutAI) {
+            hasAskedAboutAI = true;
+            showAIUsageModal();
+        }
+    }
+}
+
+// Page navigation
+function showPage(pageId) {
+    document.querySelectorAll('.page-container').forEach(page => {
+        page.classList.add('d-none');
+    });
+    
+    const targetPage = document.getElementById(`page-${pageId}`);
+    if (targetPage) {
+        targetPage.classList.remove('d-none');
+        const previousPage = currentPage;
+        currentPage = pageId;
+        
+        // Show/hide progress bar
+        const progressContainer = document.getElementById('progress-container');
+        if (progressContainer) {
+            progressContainer.style.display = (pageId === 'login' || pageId === 'thankyou') ? 'none' : 'block';
+        }
+        
+        // Update progress bar
+        if (currentParticipantProgress) {
+            updateProgressBar();
+        }
+        
+        logEvent('page_view', {
+            page: pageId,
+            from_page: previousPage,
+            video_id: currentVideoId,
+            timestamp: new Date().toISOString()
+        });
+    }
+}
+
+// Login handler
+async function handleLogin() {
+    const codeInput = document.getElementById('participant-code-input');
+    const participantCode = codeInput?.value.trim().toUpperCase();
+    
+    if (!participantCode) {
+        showAlert('Please enter your participant code.', 'warning');
+        return;
+    }
+    
+    // Check if participant exists
+    const progress = await loadParticipantProgress(participantCode);
+    
+    if (progress) {
+        // Returning participant
+        currentParticipant = participantCode;
+        currentParticipantProgress = progress;
+        
+        // Show resume message
+        const resumeInfo = document.getElementById('resume-info');
+        const resumeMessage = document.getElementById('resume-message');
+        if (resumeInfo && resumeMessage) {
+            const videosDone = progress.videos_completed?.length || 0;
+            resumeMessage.textContent = `Welcome back! You have completed ${videosDone}/4 videos.`;
+            resumeInfo.classList.remove('d-none');
+        }
+        
+        // If pre-survey not done, show it
+        if (!progress.pre_survey_completed) {
+            setTimeout(() => {
+                showPage('presurvey');
+                loadSurvey('pre');
+            }, 1500);
+        } else {
+            // Go to dashboard
+            setTimeout(() => {
+                showPage('dashboard');
+                renderDashboard();
+            }, 1500);
+        }
+    } else {
+        // New participant
+        currentParticipant = participantCode;
+        const condition = assignCondition(participantCode);
+        
+        // Create new progress record
+        await createParticipantProgress(participantCode, condition);
+        currentParticipantProgress = {
+            participant_name: participantCode,
+            assigned_condition: condition,
+            videos_completed: [],
+            pre_survey_completed: false,
+            post_survey_completed: false,
+            video_surveys: {}
+        };
+        
+        logEvent('participant_registered', {
+            participant_name: participantCode,
+            assigned_condition: condition
+        });
+        
+        // Show pre-survey
+        setTimeout(() => {
+            showPage('presurvey');
+            loadSurvey('pre');
+        }, 1500);
+    }
+}
+
+// Assign condition (random 50/50)
+function assignCondition(participantName) {
+    return Math.random() < 0.5 ? 'control' : 'experimental';
+}
+
+// Load participant progress
+async function loadParticipantProgress(participantName) {
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('participant_progress')
+            .select('*')
+            .eq('participant_name', participantName)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+            console.error('Error loading progress:', error);
+            return null;
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Error in loadParticipantProgress:', error);
+        return null;
+    }
+}
+
+// Create participant progress
+async function createParticipantProgress(participantName, condition) {
+    if (!supabase) return;
+    
+    try {
+        const { error } = await supabase
+            .from('participant_progress')
+            .insert([{
+                participant_name: participantName,
+                assigned_condition: condition,
+                videos_completed: [],
+                pre_survey_completed: false,
+                post_survey_completed: false,
+                video_surveys: {},
+                last_active_at: new Date().toISOString()
+            }]);
+        
+        if (error) {
+            console.error('Error creating progress:', error);
+        }
+    } catch (error) {
+        console.error('Error in createParticipantProgress:', error);
+    }
+}
+
+// Render dashboard
+function renderDashboard() {
+    if (!currentParticipantProgress) return;
+    
+    // Update participant name
+    const nameEl = document.getElementById('dashboard-participant-name');
+    if (nameEl) nameEl.textContent = currentParticipant;
+    
+    // Update progress bar
+    updateProgressBar();
+    
+    // Render video cards
+    const container = document.getElementById('video-cards-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    VIDEOS.forEach((video, index) => {
+        const isCompleted = currentParticipantProgress.videos_completed?.includes(video.id) || false;
+        const card = createVideoCard(video, index + 1, isCompleted);
+        container.appendChild(card);
+    });
+    
+    // Show post-survey button if all videos complete
+    const videosDone = currentParticipantProgress.videos_completed?.length || 0;
+    const postSurveySection = document.getElementById('post-survey-section');
+    if (postSurveySection) {
+        postSurveySection.classList.toggle('d-none', videosDone < 4 || currentParticipantProgress.post_survey_completed);
+    }
+}
+
+// Create video card
+function createVideoCard(video, number, isCompleted) {
+    const card = document.createElement('div');
+    card.className = 'col-md-6 col-lg-3';
+    
+    card.innerHTML = `
+        <div class="card h-100 video-card ${isCompleted ? 'completed' : ''}" data-video-id="${video.id}">
+            <div class="card-body text-center">
+                <h5>Video ${number}</h5>
+                <p class="text-muted">${video.name}</p>
+                ${isCompleted 
+                    ? '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Completed</span>'
+                    : '<button class="btn btn-primary start-video-btn" data-video-id="' + video.id + '">Start Video</button>'
+                }
+            </div>
+        </div>
+    `;
+    
+    // Add click handler for start button
+    const startBtn = card.querySelector('.start-video-btn');
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            startVideoTask(video.id);
+        });
+    }
+    
+    return card;
+}
+
+// Start video task
+function startVideoTask(videoId) {
+    currentVideoId = videoId;
+    const video = VIDEOS.find(v => v.id === videoId);
+    
+    if (!video) return;
+    
+    // Update task page with video info
+    const titleEl = document.getElementById('video-task-title');
+    const subtitleEl = document.getElementById('video-task-subtitle');
+    const codeEl = document.getElementById('task-participant-code');
+    const videoNameEl = document.getElementById('task-video-name');
+    
+    if (titleEl) titleEl.textContent = `Video Task: ${video.name}`;
+    if (subtitleEl) subtitleEl.textContent = 'Analyze your teaching reflection and receive feedback';
+    if (codeEl) codeEl.value = currentParticipant;
+    if (videoNameEl) videoNameEl.value = video.name;
+    
+    // Reset task state
+    currentTaskState = {
+        feedbackGenerated: false,
+        submitted: false,
+        currentReflectionId: null,
+        parentReflectionId: null,
+        revisionCount: 0,
+        currentFeedbackType: null,
+        currentFeedbackStartTime: null
+    };
+    
+    // Clear reflection text
+    const reflectionText = document.getElementById('task-reflection-text');
+    if (reflectionText) reflectionText.value = '';
+    updateWordCount();
+    
+    // Show percentage explanation
+    const explanationEl = document.getElementById('percentage-explanation');
+    if (explanationEl) explanationEl.classList.remove('d-none');
+    
+    // Show task page
+    showPage('video-task');
+    
+    logEvent('video_task_started', {
+        video_id: videoId,
+        participant_name: currentParticipant
+    });
+}
+
+// Update progress bar
+function updateProgressBar() {
+    if (!currentParticipantProgress) return;
+    
+    const videosDone = currentParticipantProgress.videos_completed?.length || 0;
+    const progress = (videosDone / 4) * 100;
+    
+    const progressBar = document.getElementById('dashboard-progress-bar');
+    const progressText = document.getElementById('dashboard-progress-text');
+    
+    if (progressBar) {
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+    }
+    
+    if (progressText) {
+        progressText.textContent = `${videosDone}/4 Videos Completed`;
+    }
+}
+
+// Load survey iframe
+function loadSurvey(surveyType) {
+    let surveyUrl = '';
+    
+    if (surveyType === 'pre') {
+        surveyUrl = QUALTRICS_SURVEYS.pre;
+        document.getElementById('pre-survey-iframe').src = surveyUrl;
+    } else if (surveyType === 'post') {
+        surveyUrl = QUALTRICS_SURVEYS.post;
+        document.getElementById('post-survey-iframe').src = surveyUrl;
+    } else if (surveyType.startsWith('post_video_')) {
+        const videoNum = surveyType.split('_')[2];
+        surveyUrl = QUALTRICS_SURVEYS[`post_video_${videoNum}`];
+        document.getElementById('post-video-survey-iframe').src = surveyUrl;
+        
+        // Update title
+        const titleEl = document.getElementById('post-video-survey-title');
+        const subtitleEl = document.getElementById('post-video-survey-subtitle');
+        if (titleEl) titleEl.textContent = `Post-Video ${videoNum} Questionnaire`;
+        if (subtitleEl) subtitleEl.textContent = `Please share your thoughts about Video ${videoNum}`;
+    }
+}
+
+// Mark pre-survey complete
+async function markPreSurveyComplete() {
+    if (!supabase || !currentParticipant) return;
+    
+    try {
+        const { error } = await supabase
+            .from('participant_progress')
+            .update({ 
+                pre_survey_completed: true,
+                last_active_at: new Date().toISOString()
+            })
+            .eq('participant_name', currentParticipant);
+        
+        if (error) console.error('Error marking pre-survey complete:', error);
+        else {
+            currentParticipantProgress.pre_survey_completed = true;
+            logEvent('pre_survey_completed', { participant_name: currentParticipant });
+        }
+    } catch (error) {
+        console.error('Error in markPreSurveyComplete:', error);
+    }
+}
+
+// Mark video survey complete
+async function markVideoSurveyComplete() {
+    if (!supabase || !currentParticipant || !currentVideoId) return;
+    
+    try {
+        const videoSurveys = currentParticipantProgress.video_surveys || {};
+        videoSurveys[currentVideoId] = true;
+        
+        const { error } = await supabase
+            .from('participant_progress')
+            .update({ 
+                video_surveys: videoSurveys,
+                last_active_at: new Date().toISOString()
+            })
+            .eq('participant_name', currentParticipant);
+        
+        if (error) console.error('Error marking video survey complete:', error);
+        else {
+            currentParticipantProgress.video_surveys = videoSurveys;
+            logEvent('video_survey_completed', { 
+                participant_name: currentParticipant,
+                video_id: currentVideoId
+            });
+        }
+    } catch (error) {
+        console.error('Error in markVideoSurveyComplete:', error);
+    }
+}
+
+// Mark post-survey complete
+async function markPostSurveyComplete() {
+    if (!supabase || !currentParticipant) return;
+    
+    try {
+        const { error } = await supabase
+            .from('participant_progress')
+            .update({ 
+                post_survey_completed: true,
+                last_active_at: new Date().toISOString()
+            })
+            .eq('participant_name', currentParticipant);
+        
+        if (error) console.error('Error marking post-survey complete:', error);
+        else {
+            currentParticipantProgress.post_survey_completed = true;
+            logEvent('post_survey_completed', { participant_name: currentParticipant });
+        }
+    } catch (error) {
+        console.error('Error in markPostSurveyComplete:', error);
+    }
+}
+
+// Word count
+function updateWordCount() {
+    const text = document.getElementById('task-reflection-text')?.value.trim() || '';
+    const words = text ? text.split(/\s+/).length : 0;
+    const wordCountEl = document.getElementById('task-word-count');
+    if (wordCountEl) wordCountEl.textContent = words;
+}
+
+// Generate feedback handler
+async function handleGenerateFeedback() {
+    const reflection = document.getElementById('task-reflection-text')?.value.trim();
+    
+    if (!reflection) {
+        showAlert('Please enter a reflection text first.', 'warning');
+        return;
+    }
+    
+    // Show style preference modal on first generation
+    if (!currentTaskState.feedbackGenerated) {
+        const modal = new bootstrap.Modal(document.getElementById('feedback-preference-modal'));
+        modal.show();
+        
+        document.getElementById('feedback-preference-modal').addEventListener('hidden.bs.modal', function handler() {
+            this.removeEventListener('hidden.bs.modal', handler);
+            generateFeedback(reflection);
+        });
+    } else {
+        generateFeedback(reflection);
+    }
+}
+
+// Generate feedback (core logic - same as original)
+async function generateFeedback(reflection) {
+    const loadingSpinner = document.getElementById('task-loading-spinner');
+    const generateBtn = document.getElementById('task-generate-btn');
+    
+    // Show loading
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (generateBtn) generateBtn.disabled = true;
+    
+    // Rotate loading messages
+    const loadingText = document.getElementById('task-loading-text');
+    let loadingMessageIndex = 0;
+    const loadingInterval = setInterval(() => {
+        loadingMessageIndex = (loadingMessageIndex + 1) % translations[currentLanguage].loading_messages.length;
+        if (loadingText) {
+            loadingText.textContent = translations[currentLanguage].loading_messages[loadingMessageIndex];
+        }
+    }, 8000);
+    
+    try {
+        // Step 1: Analyze reflection
+        const analysisResult = await analyzeReflectionDistribution(reflection, currentLanguage);
+        
+        // Store binary classification results
+        await storeBinaryClassificationResults(analysisResult);
+        
+        // Step 2: Check for non-meaningful input
+        if (analysisResult.percentages_priority.professional_vision < 10) {
+            displayAnalysisDistribution(analysisResult);
+            const simpleMessage = currentLanguage === 'en'
+                ? "Please write a reflection that relates to the teaching video you watched. Focus on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                : "Bitte schreiben Sie eine Reflexion, die sich auf das Unterrichtsvideo bezieht, das Sie sich angeschaut haben. Konzentrieren Sie sich darauf zu beschreiben, was Sie beobachtet haben, zu erklären, warum es passiert ist (unter Verwendung pädagogischer Theorien), und die Auswirkungen auf das Lernen der Schüler vorherzusagen.";
+            
+            const feedbackExtended = document.getElementById('task-feedback-extended');
+            const feedbackShort = document.getElementById('task-feedback-short');
+            if (feedbackExtended) feedbackExtended.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${simpleMessage}</div>`;
+            if (feedbackShort) feedbackShort.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${simpleMessage}</div>`;
+            
+            const feedbackTabs = document.getElementById('task-feedback-tabs');
+            if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+            
+            clearInterval(loadingInterval);
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (generateBtn) generateBtn.disabled = false;
+            return;
+        }
+        
+        // Step 3: Display analysis distribution
+        displayAnalysisDistribution(analysisResult);
+        
+        // Step 4: Generate both feedback styles
+        const [extendedFeedback, shortFeedback] = await Promise.all([
+            generateWeightedFeedback(reflection, currentLanguage, 'academic', analysisResult),
+            generateWeightedFeedback(reflection, currentLanguage, 'user-friendly', analysisResult)
+        ]);
+        
+        // Step 5: Add revision suggestion if needed
+        let finalShortFeedback = shortFeedback;
+        if (analysisResult && analysisResult.percentages_priority.other > 50) {
+            const revisionNote = currentLanguage === 'en' 
+                ? "\n\n**Important Note:** Your reflection contains a significant amount of content that doesn't follow professional lesson analysis steps. Please revise your reflection to focus more on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                : "\n\n**Wichtiger Hinweis:** Ihre Reflexion enthält einen erheblichen Anteil an Inhalten, die nicht den Schritten einer professionellen Stundenanalyse folgen. Bitte überarbeiten Sie Ihre Reflexion, um sich mehr auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
+            finalShortFeedback += revisionNote;
+        }
+        
+        // Step 6: Save to database
+        await saveFeedbackToDatabase({
+            participantCode: currentParticipant,
+            videoSelected: currentVideoId,
+            reflectionText: reflection,
+            analysisResult,
+            extendedFeedback,
+            shortFeedback: finalShortFeedback
+        });
+        
+        // Step 7: Display feedback
+        const feedbackExtended = document.getElementById('task-feedback-extended');
+        const feedbackShort = document.getElementById('task-feedback-short');
+        if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(extendedFeedback, analysisResult);
+        if (feedbackShort) feedbackShort.innerHTML = formatStructuredFeedback(finalShortFeedback, analysisResult);
+        
+        // Step 8: Show tabs
+        const feedbackTabs = document.getElementById('task-feedback-tabs');
+        if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+        
+        if (userPreferredFeedbackStyle === 'short') {
+            document.getElementById('task-short-tab')?.click();
+        } else {
+            document.getElementById('task-extended-tab')?.click();
+        }
+        
+        // Start feedback viewing tracking
+        startFeedbackViewing(userPreferredFeedbackStyle, currentLanguage);
+        
+        // Step 9: Show revise and submit buttons
+        const reviseBtn = document.getElementById('task-revise-btn');
+        const submitBtn = document.getElementById('task-submit-final');
+        if (reviseBtn) reviseBtn.style.display = 'inline-block';
+        if (submitBtn) submitBtn.style.display = 'block';
+        
+        currentTaskState.feedbackGenerated = true;
+        
+        showAlert('✅ Feedback generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating feedback:', error);
+        showAlert(`⚠️ ${error.message}`, 'danger');
+    } finally {
+        clearInterval(loadingInterval);
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (generateBtn) generateBtn.disabled = false;
+    }
+}
+
+// Display analysis distribution
+function displayAnalysisDistribution(analysisResult) {
+    const rawPercentages = analysisResult.percentages_raw || analysisResult.percentages;
+    const isGerman = currentLanguage === 'de';
+    
+    // Create or update distribution container
+    let container = document.getElementById('analysis-distribution-task');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'analysis-distribution-task';
+        container.className = 'analysis-distribution-professional mb-3';
+        const feedbackTabs = document.getElementById('task-feedback-tabs');
+        if (feedbackTabs) {
+            feedbackTabs.parentNode.insertBefore(container, feedbackTabs);
+        }
+    }
+    
+    if (rawPercentages.professional_vision <= 5) {
+        container.innerHTML = `
+            <div class="professional-analysis-summary">
+                <h6>${isGerman ? 'Analyse Ihrer Reflexion' : 'Analysis of Your Reflection'}</h6>
+                <p class="analysis-text text-warning">
+                    ${isGerman ? 'Ihr Text bezieht sich nicht auf Professional Vision. Überarbeiten Sie ihn, um ihn auf das Video zu beziehen.' 
+                              : 'Your text does not relate to professional vision. Revise to relate to the video.'}
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="professional-analysis-summary">
+            <h6>${isGerman ? 'Analyse Ihrer Reflexion' : 'Analysis of Your Reflection'}</h6>
+            <p class="analysis-text">
+                ${isGerman 
+                    ? `Ihre Reflexion enthält ${rawPercentages.description || 0}% Beschreibung, ${rawPercentages.explanation || 0}% Erklärung und ${rawPercentages.prediction || 0}% Vorhersage.` 
+                    : `Your reflection contains ${rawPercentages.description || 0}% description, ${rawPercentages.explanation || 0}% explanation, and ${rawPercentages.prediction || 0}% prediction.`}
+            </p>
+        </div>
+    `;
+}
+
+// Button handlers
+function handleClear() {
+    const reflectionText = document.getElementById('task-reflection-text');
+    if (reflectionText) {
+        reflectionText.value = '';
+        updateWordCount();
+        reflectionText.focus();
+    }
+}
+
+function handleCopy() {
+    const activeTab = document.querySelector('#task-feedback-tabs .nav-link.active');
+    const feedbackType = activeTab?.id.includes('extended') ? 'extended' : 'short';
+    const feedbackContent = feedbackType === 'extended'
+        ? document.getElementById('task-feedback-extended')?.textContent
+        : document.getElementById('task-feedback-short')?.textContent;
+    
+    if (feedbackContent) {
+        navigator.clipboard.writeText(feedbackContent).then(() => {
+            showAlert('✅ Feedback copied to clipboard!', 'success');
+            logEvent('copy_feedback', {
+                video_id: currentVideoId,
+                feedback_type: feedbackType,
+                reflection_id: currentTaskState.currentReflectionId
+            });
+        });
+    }
+}
+
+function handleRevise() {
+    if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
+        endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
+    }
+    
+    document.getElementById('task-reflection-text')?.focus();
+    showAlert('You can now revise your reflection and generate new feedback.', 'info');
+    
+    currentTaskState.revisionCount = (currentTaskState.revisionCount || 0) + 1;
+    
+    logEvent('click_revise', {
+        video_id: currentVideoId,
+        reflection_id: currentTaskState.currentReflectionId,
+        revision_number: currentTaskState.revisionCount
+    });
+}
+
+function handleFinalSubmission() {
+    if (!currentTaskState.feedbackGenerated) {
+        showAlert('Please generate feedback before submitting.', 'warning');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('final-submission-modal'));
+    modal.show();
+}
+
+function confirmFinalSubmission() {
+    currentTaskState.submitted = true;
+    
+    // Mark video as completed
+    markVideoCompleted();
+    
+    logEvent('final_submission', {
+        video_id: currentVideoId,
+        participant_name: currentParticipant,
+        total_revisions: currentTaskState.revisionCount || 1
+    });
+    
+    showAlert('✅ Final reflection submitted successfully!', 'success');
+    
+    // Show post-video survey
+    setTimeout(() => {
+        const videoNum = VIDEOS.findIndex(v => v.id === currentVideoId) + 1;
+        showPage('post-video-survey');
+        loadSurvey(`post_video_${videoNum}`);
+    }, 1500);
+}
+
+// Mark video as completed
+async function markVideoCompleted() {
+    if (!supabase || !currentParticipant || !currentVideoId) return;
+    
+    try {
+        const videosCompleted = currentParticipantProgress.videos_completed || [];
+        if (!videosCompleted.includes(currentVideoId)) {
+            videosCompleted.push(currentVideoId);
+        }
+        
+        const { error } = await supabase
+            .from('participant_progress')
+            .update({ 
+                videos_completed: videosCompleted,
+                last_active_at: new Date().toISOString()
+            })
+            .eq('participant_name', currentParticipant);
+        
+        if (error) {
+            console.error('Error marking video completed:', error);
+        } else {
+            currentParticipantProgress.videos_completed = videosCompleted;
+            logEvent('video_completed', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId
+            });
+        }
+    } catch (error) {
+        console.error('Error in markVideoCompleted:', error);
+    }
+}
+
+// Language switching
+function switchLanguage(lang) {
+    currentLanguage = lang;
+    document.querySelectorAll('input[type="radio"][name^="task-language"]').forEach(radio => {
+        if (radio.id.includes(`lang-${lang}`)) {
+            radio.checked = true;
+        }
+    });
+}
+
+// AI Usage Modal
+function showAIUsageModal() {
+    const modal = new bootstrap.Modal(document.getElementById('ai-usage-modal'));
+    modal.show();
+}
+
+function handleAIUsageResponse(usedAI) {
+    logEvent('ai_usage_response', {
+        used_ai: usedAI,
+        tab_switch_count: tabSwitchCount,
+        current_page: currentPage,
+        video_id: currentVideoId,
+        timestamp: new Date().toISOString()
+    });
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('ai-usage-modal'));
+    if (modal) modal.hide();
+    
+    if (usedAI) {
+        const message = currentLanguage === 'de' 
+            ? 'Vielen Dank für Ihre Ehrlichkeit. Bitte beachten Sie, dass diese Aufgabe Ihre eigene Analyse erfordert.'
+            : 'Thank you for your honesty. Please note that this task requires your own analysis.';
+        showAlert(message, 'warning');
+    }
+}
+
+// Make handleAIUsageResponse global for onclick
+window.handleAIUsageResponse = handleAIUsageResponse;
+
+// Feedback viewing tracking
+function startFeedbackViewing(style, language) {
+    currentTaskState.currentFeedbackStartTime = Date.now();
+    currentTaskState.currentFeedbackType = style;
+    
+    logEvent('view_feedback_start', {
+        video_id: currentVideoId,
+        style: style,
+        language: language,
+        reflection_id: currentTaskState.currentReflectionId
+    });
+}
+
+function endFeedbackViewing(style, language) {
+    if (!currentTaskState.currentFeedbackStartTime) return;
+    
+    const duration = (Date.now() - currentTaskState.currentFeedbackStartTime) / 1000;
+    logEvent('view_feedback_end', {
+        video_id: currentVideoId,
+        style: style,
+        language: language,
+        duration_seconds: duration,
+        reflection_id: currentTaskState.currentReflectionId
+    });
+    
+    currentTaskState.currentFeedbackStartTime = null;
+    currentTaskState.currentFeedbackType = null;
+}
+
+// Alert system
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+}
+
+// ============================================================================
+// Core Analysis Functions (Same as original - keep all logic)
+// ============================================================================
+
+async function analyzeReflectionDistribution(reflection, language) {
+    try {
+        const windows = createSentenceWindows(reflection);
+        const classificationResults = [];
+        
+        for (const window of windows) {
+            const [description, explanation, prediction] = await Promise.all([
+                classifyDescription(window.text),
+                classifyExplanation(window.text),
+                classifyPrediction(window.text)
+            ]);
+            
+            classificationResults.push({
+                window_id: window.id,
+                window_text: window.text,
+                description,
+                explanation,
+                prediction
+            });
+        }
+        
+        const analysis = calculatePercentages(classificationResults);
+        analysis.classificationResults = classificationResults;
+        analysis.windows = windows;
+        
+        return analysis;
+    } catch (error) {
+        console.error('Error in classification:', error);
+        return {
+            percentages_raw: { description: 30, explanation: 35, prediction: 25, professional_vision: 90 },
+            percentages_priority: { description: 30, explanation: 35, prediction: 25, other: 10, professional_vision: 90 },
+            weakest_component: "Prediction",
+            classificationResults: [],
+            windows: []
+        };
+    }
+}
+
+function createSentenceWindows(text) {
+    const sentences = text.match(/[^\.!?]+[\.!?]+/g) || [text];
+    const cleanSentences = sentences.map(s => s.trim()).filter(s => s.length > 0);
+    
+    const windows = [];
+    let windowId = 1;
+    
+    for (let i = 0; i < cleanSentences.length; i += 3) {
+        const remainingSentences = cleanSentences.length - i;
+        const sentenceCount = Math.min(3, remainingSentences);
+        const windowText = cleanSentences.slice(i, i + sentenceCount).join(' ');
+        
+        if (windowText.length >= 20) {
+            windows.push({
+                id: `chunk_${String(windowId++).padStart(3, '0')}`,
+                text: windowText,
+                sentence_count: sentenceCount,
+                start_position: i
+            });
+        }
+    }
+    
+    return windows.length > 0 ? windows : [{ 
+        id: 'chunk_001', 
+        text: text, 
+        sentence_count: 1, 
+        start_position: 0 
+    }];
+}
+
+async function classifyDescription(windowText) {
+    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains descriptions of observable teaching events.
+
+DEFINITION: Descriptions identify and differentiate teaching events based on educational knowledge, WITHOUT making evaluations, interpretations, or speculations.
+
+CRITERIA FOR "1" (Contains Description):
+- Identifies observable teacher or student actions
+- Relates to learning processes, teaching processes, or learning activities
+- Uses neutral, observational language
+
+CRITERIA FOR "0" (No Description):
+- Contains evaluations, interpretations, or speculations
+- Not about teaching/learning events
+
+INSTRUCTIONS: Respond with ONLY "1" or "0"
+
+TEXT: ${windowText}`;
+
+    return await callBinaryClassifier(prompt);
+}
+
+async function classifyExplanation(windowText) {
+    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains explanations that connect teaching events to educational theories.
+
+DEFINITION: Explanations relate observable teaching events to theories of effective teaching, focusing on WHY events occur.
+
+CRITERIA FOR "1" (Contains Explanation):
+- Links observable teaching events to educational knowledge
+- References learning theories, teaching principles, or pedagogical concepts
+- Explains WHY a teaching action was used or effective
+- Examples: "Open questions activate students cognitively", "Rules prevent disruptions"
+
+CRITERIA FOR "0" (No Explanation):
+- No connection to educational theories or principles
+- Explains non-observable or hypothetical events
+- No reference to teaching/learning events
+- Pure description without theoretical connection
+
+INSTRUCTIONS:
+- Respond with ONLY "1" or "0"
+- No explanations, quotes, or other text
+- "1" if ANY part connects teaching events to educational knowledge
+- "0" if no theoretical connections present
+
+TEXT: ${windowText}`;
+
+    return await callBinaryClassifier(prompt);
+}
+
+async function classifyPrediction(windowText) {
+    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains predictions about effects of teaching events on student learning.
+
+DEFINITION: Predictions estimate potential consequences of teaching events for students based on learning theories.
+
+CRITERIA FOR "1" (Contains Prediction):
+- Predicts effects on student learning, motivation, or understanding
+- Based on educational knowledge about learning
+- Focuses on consequences for students
+- Examples: "This feedback could increase motivation", "Students may feel confused"
+
+CRITERIA FOR "0" (No Prediction):
+- No effects on student learning mentioned
+- Predictions without educational basis
+- No connection to teaching events
+- Predictions about non-learning outcomes
+
+INSTRUCTIONS:
+- Respond with ONLY "1" or "0"
+- No explanations, quotes, or other text
+- "1" if ANY part predicts effects on student learning
+- "0" if no learning consequences mentioned
+
+TEXT: ${windowText}`;
+
+    return await callBinaryClassifier(prompt);
+}
+
+async function callBinaryClassifier(prompt) {
+    const requestData = {
+        model: model,
+        messages: [
+            {
+                role: "system",
+                content: "You are an expert teaching reflection analyst. Be conservative in your classifications - only respond '1' if you are clearly certain the criteria are met. Respond with ONLY '1' or '0'."
+            },
+            {
+                role: "user",
+                content: prompt
+            }
+        ],
+        temperature: 0.0,
+        max_tokens: 10
+    };
+    
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            const response = await fetch(OPENAI_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            });
+            
+            if (!response.ok) {
+                console.warn(`Binary classifier attempt ${attempt + 1} failed: HTTP ${response.status}`);
+                continue;
+            }
+            
+            const result = await response.json();
+            const output = result.choices[0].message.content.trim();
+            
+            if (output === '1' || output === '0') {
+                return parseInt(output);
+            }
+            
+            if (output.includes('1')) return 1;
+            if (output.includes('0')) return 0;
+            
+            console.warn(`Binary classifier attempt ${attempt + 1}: Unexpected output: "${output}"`);
+            
+        } catch (error) {
+            console.warn(`Binary classifier attempt ${attempt + 1} failed:`, error);
+        }
+    }
+    
+    console.error('All binary classifier attempts failed, defaulting to 0');
+    return 0;
+}
+
+function calculatePercentages(classificationResults) {
+    const totalWindows = classificationResults.length;
+    
+    if (totalWindows === 0) {
+        return {
+            percentages_raw: { description: 0, explanation: 0, prediction: 0, professional_vision: 0 },
+            percentages_priority: { description: 0, explanation: 0, prediction: 0, other: 100, professional_vision: 0 },
+            weakest_component: "Prediction",
+            analysis_summary: "No valid windows for analysis"
+        };
+    }
+    
+    // RAW CALCULATION (can exceed 100%)
+    let rawDescriptionCount = 0;
+    let rawExplanationCount = 0;
+    let rawPredictionCount = 0;
+    
+    classificationResults.forEach(result => {
+        if (result.description === 1) rawDescriptionCount++;
+        if (result.explanation === 1) rawExplanationCount++;
+        if (result.prediction === 1) rawPredictionCount++;
+    });
+    
+    const rawPercentages = {
+        description: Math.round((rawDescriptionCount / totalWindows) * 100 * 10) / 10,
+        explanation: Math.round((rawExplanationCount / totalWindows) * 100 * 10) / 10,
+        prediction: Math.round((rawPredictionCount / totalWindows) * 100 * 10) / 10,
+        professional_vision: Math.round(((rawDescriptionCount + rawExplanationCount + rawPredictionCount) / totalWindows) * 100 * 10) / 10
+    };
+    
+    // PRIORITY-BASED CALCULATION (adds to 100%)
+    let descriptionCount = 0;
+    let explanationCount = 0;
+    let predictionCount = 0;
+    let otherCount = 0;
+    
+    classificationResults.forEach(result => {
+        if (result.description === 1) {
+            descriptionCount++;
+        } else if (result.explanation === 1) {
+            explanationCount++;
+        } else if (result.prediction === 1) {
+            predictionCount++;
+        } else {
+            otherCount++;
+        }
+    });
+    
+    const priorityPercentages = {
+        description: Math.round((descriptionCount / totalWindows) * 100 * 10) / 10,
+        explanation: Math.round((explanationCount / totalWindows) * 100 * 10) / 10,
+        prediction: Math.round((predictionCount / totalWindows) * 100 * 10) / 10,
+        other: Math.round((otherCount / totalWindows) * 100 * 10) / 10,
+        professional_vision: Math.round(((descriptionCount + explanationCount + predictionCount) / totalWindows) * 100 * 10) / 10
+    };
+    
+    // Find weakest component
+    const components = {
+        'Description': priorityPercentages.description,
+        'Explanation': priorityPercentages.explanation,
+        'Prediction': priorityPercentages.prediction
+    };
+    
+    const weakestComponent = Object.keys(components).reduce((a, b) => 
+        components[a] <= components[b] ? a : b
+    );
+    
+    return {
+        percentages_raw: rawPercentages,
+        percentages_priority: priorityPercentages,
+        percentages: rawPercentages,
+        weakest_component: weakestComponent,
+        analysis_summary: `Analyzed ${totalWindows} windows. Raw: D:${rawPercentages.description}% E:${rawPercentages.explanation}% P:${rawPercentages.prediction}% (Total PV: ${rawPercentages.professional_vision}%). Priority-based: D:${priorityPercentages.description}% E:${priorityPercentages.explanation}% P:${priorityPercentages.prediction}% Other:${priorityPercentages.other}% = 100%`
+    };
+}
+
+// ============================================================================
+// Feedback Generation (Same as original)
+// ============================================================================
+
+async function generateWeightedFeedback(reflection, language, style, analysisResult) {
+    const promptType = `${style} ${language === 'en' ? 'English' : 'German'}`;
+    const systemPrompt = getFeedbackPrompt(promptType, analysisResult);
+    const pctPriority = analysisResult.percentages_priority;
+    
+    const languageInstruction = language === 'en' 
+        ? "IMPORTANT: You MUST respond in English. The entire feedback MUST be in English only."
+        : "WICHTIG: Sie MÜSSEN auf Deutsch antworten. Das gesamte Feedback MUSS ausschließlich auf Deutsch sein.";
+    
+    const requestData = {
+        model: model,
+        messages: [
+            { role: "system", content: languageInstruction + "\n\n" + systemPrompt },
+            { role: "user", content: `Based on the analysis showing ${pctPriority.description}% description, ${pctPriority.explanation}% explanation, ${pctPriority.prediction}% prediction (Professional Vision: ${pctPriority.professional_vision}%) + Other: ${pctPriority.other}% = 100%, provide feedback for this reflection:\n\n${reflection}` }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+    };
+    
+    try {
+        const response = await fetch(OPENAI_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        let feedback = result.choices[0].message.content;
+        
+        if (style === 'user-friendly') {
+            feedback = feedback.replace(/\s*\([^)]+\d{4}\)/g, '');
+        }
+        
+        return feedback;
+    } catch (error) {
+        console.error('Error in generateWeightedFeedback:', error);
+        throw error;
+    }
+}
+
+function getFeedbackPrompt(promptType, analysisResult) {
+    const weakestComponent = analysisResult?.weakest_component || 'Prediction';
+    
+    const prompts = {
+        'academic English': `You are a supportive yet rigorous teaching mentor providing feedback in a scholarly tone. Your feedback MUST be detailed, academic, and comprehensive, deeply integrating theory.
+
+**Knowledge Base Integration:**
+You MUST base your feedback on the theoretical framework of empirical teaching quality research. Specifically, use the process-oriented teaching-learning model (Seidel & Shavelson, 2007) or the three basic dimensions of teaching quality (Klieme, 2006) for feedback on description and explanation. For prediction, use self-determination theory (Deci & Ryan, 1993) or theories of cognitive and constructive learning (Atkinson & Shiffrin, 1968; Craik & Lockhart, 1972).
+
+**CRITICAL: You MUST explicitly cite these theories using the (Author, Year) format. Do NOT cite any other theories.**
+
+**MANDATORY WEIGHTED FEEDBACK STRUCTURE:**
+1. **Weakest Area Focus**: Write 6-8 detailed, academic sentences ONLY for the weakest component (${weakestComponent}), integrating multiple specific suggestions and deeply connecting them to theory.
+2. **Stronger Areas**: For the two stronger components, write EXACTLY 3-4 detailed sentences each (1 Strength, 1 Suggestion, 1 'Why' that explicitly connects to theory).
+3. **Conclusion**: Write 2-3 sentences summarizing the key area for development.
+
+**CRITICAL FOCUS REQUIREMENTS:**
+- Focus ONLY on analysis skills, not teaching performance.
+- Emphasize objective, non-evaluative observation for the Description section.
+
+**FORMATTING:**
+- Sections: "#### Description", "#### Explanation", "#### Prediction", "#### Conclusion"
+- Sub-headings: "Strength:", "Suggestions:", "Why:"`,
+        
+        'user-friendly English': `You are a friendly teaching mentor providing feedback for a busy teacher who wants quick, practical tips.
+
+**Style Guide - MUST BE FOLLOWED:**
+- **Language**: Use simple, direct language. Avoid academic jargon completely.
+- **Citations**: Do NOT include any in-text citations like (Author, Year).
+- **Focus**: Give actionable advice. Do NOT explain the theory behind the advice.
+
+**MANDATORY CONCISE FEEDBACK STRUCTURE:**
+1. **Weakest Area Focus**: For the weakest component (${weakestComponent}), provide a "Good:" section with 1-2 sentences, and a "Tip:" section with a bulleted list of 2-3 clear, practical tips.
+2. **Stronger Areas**: For the two stronger components, write a "Good:" section with one sentence and a "Tip:" section with one practical tip.
+3. **No Conclusion**: Do not include a "Conclusion" section.
+
+**FORMATTING:**
+- Sections: "#### Description", "#### Explanation", "#### Prediction"
+- Sub-headings: "Good:", "Tip:"`,
+        
+        'academic German': `Sie sind ein unterstützender, aber rigoroser Mentor, der Feedback in einem wissenschaftlichen Ton gibt. Ihr Feedback MUSS detailliert, akademisch und umfassend sein und die Theorie tief integrieren.
+
+**Wissensbasierte Integration:**
+Basieren Sie Ihr Feedback auf dem theoretischen Rahmen der empirischen Unterrichtsqualitätsforschung. Verwenden Sie das prozessorientierte Lehr-Lern-Modell (Seidel & Shavelson, 2007) oder die drei Grunddimensionen der Unterrichtsqualität (Klieme, 2006) für Feedback zu Beschreibung und Erklärung. Für die Vorhersage verwenden Sie die Selbstbestimmungstheorie der Motivation (Deci & Ryan, 1993) oder Theorien des kognitiven und konstruktiven Lernens (Atkinson & Shiffrin, 1968; Craik & Lockhart, 1972).
+
+**KRITISCH: Sie MÜSSEN diese Theorien explizit im Format (Autor, Jahr) zitieren. Zitieren Sie KEINE anderen Theorien.**
+
+**OBLIGATORISCHE GEWICHTETE FEEDBACK-STRUKTUR:**
+1. **Fokus auf den schwächsten Bereich**: Schreiben Sie 6-8 detaillierte, akademische Sätze NUR für die schwächste Komponente (${weakestComponent}), mit mehreren spezifischen Vorschlägen und tiefen theoretischen Verbindungen.
+2. **Stärkere Bereiche**: Für die beiden stärkeren Komponenten schreiben Sie GENAU 3-4 detaillierte Sätze (1 Stärke, 1 Vorschlag, 1 'Warum' mit explizitem Theoriebezug).
+3. **Fazit**: Schreiben Sie 2-3 Sätze, die den wichtigsten Entwicklungsbereich zusammenfassen.
+
+**KRITISCHE FOKUS-ANFORDERUNGEN:**
+- Konzentrieren Sie sich NUR auf Analysefähigkeiten, nicht auf die Lehrleistung.
+- Betonen Sie bei der Beschreibung eine objektive, nicht bewertende Beobachtung.
+
+**FORMATIERUNG:**
+- Abschnitte: "#### Beschreibung", "#### Erklärung", "#### Vorhersage", "#### Fazit"
+- Unterüberschriften: "Stärke:", "Vorschläge:", "Warum:"`,
+        
+        'user-friendly German': `Sie sind ein freundlicher Mentor, der Feedback für einen vielbeschäftigten Lehrer gibt, der schnelle, praktische Tipps wünscht.
+
+**Stilrichtlinie - MUSS BEFOLGT WERDEN:**
+- **Sprache**: Verwenden Sie einfache, direkte Sprache. Vermeiden Sie akademischen Jargon vollständig.
+- **Zitate**: Fügen Sie KEINE Zitate wie (Autor, Jahr) ein.
+- **Fokus**: Geben Sie handlungsorientierte Ratschläge. Erklären Sie NICHT die Theorie hinter den Ratschlägen.
+
+**OBLIGATORISCHE PRÄGNANTE FEEDBACK-STRUKTUR:**
+1. **Fokus auf den schwächsten Bereich**: Geben Sie für die schwächste Komponente (${weakestComponent}) einen "Gut:"-Abschnitt mit 1-2 Sätzen und einen "Tipp:"-Abschnitt mit einer Stichpunktliste von 2-3 klaren, praktischen Tipps.
+2. **Stärkere Bereiche**: Schreiben Sie für die beiden stärkeren Komponenten einen "Gut:"-Abschnitt mit einem Satz und einen "Tipp:"-Abschnitt mit einem praktischen Tipp.
+3. **Kein Fazit**: Fügen Sie keinen "Fazit"-Abschnitt hinzu.
+
+**FORMATIERUNG:**
+- Abschnitte: "#### Beschreibung", "#### Erklärung", "#### Vorhersage"
+- Unterüberschriften: "Gut:", "Tipp:"`
+    };
+    
+    return prompts[promptType] || prompts['academic English'];
+}
+
+function formatStructuredFeedback(text, analysisResult) {
+    if (!text) return '';
+
+    let formattedText = text.trim().replace(/\r\n/g, '\n').replace(/\*\*(.*?)\*\*/g, '$1');
+    const sections = formattedText.split(/####\s*/).filter(s => s.trim().length > 0);
+
+    const sectionMap = {
+        'Overall Assessment': 'overall', 'Gesamtbewertung': 'overall',
+        'Description': 'description', 'Beschreibung': 'description',
+        'Explanation': 'explanation', 'Erklärung': 'explanation',
+        'Prediction': 'prediction', 'Vorhersage': 'prediction',
+        'Conclusion': 'overall', 'Fazit': 'overall'
+    };
+
+    const processedSections = sections.map(sectionText => {
+        const lines = sectionText.trim().split('\n');
+        const heading = lines.shift().trim();
+        let body = lines.join('\n').trim();
+
+        let sectionClass = 'other';
+        for (const key in sectionMap) {
+            if (heading.toLowerCase().startsWith(key.toLowerCase())) {
+                sectionClass = sectionMap[key];
+                break;
+            }
+        }
+
+        const keywords = [
+            'Strength:', 'Stärke:', 'Suggestions:', 'Vorschläge:',
+            'Why:', 'Warum:', 'Good:', 'Gut:', 'Tip:', 'Tipp:'
+        ];
+
+        keywords.forEach(keyword => {
+            const regex = new RegExp(`^(${keyword.replace(':', '\\:')})`, 'gm');
+            body = body.replace(regex, `<span class="feedback-keyword">${keyword}</span>`);
+        });
+
+        body = body.replace(/\n/g, '<br>');
+
+        return `
+            <div class="feedback-section feedback-section-${sectionClass}">
+                <h4 class="feedback-heading">${heading}</h4>
+                <div class="section-content">${body}</div>
+            </div>
+        `;
+    }).join('');
+
+    return processedSections;
+}
+
+// ============================================================================
+// Database Functions
+// ============================================================================
+
+function initSupabase() {
+    if (!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.includes('YOUR_') || SUPABASE_KEY.includes('YOUR_')) {
+        console.warn('Supabase credentials not set. Running in demo mode.');
+        showAlert('Running in demo mode - feedback works, but data won\'t be saved to database.', 'info');
+        return null;
+    }
+    
+    try {
+        if (typeof window.supabase === 'undefined' || !window.supabase) {
+            throw new Error('Supabase library not loaded from CDN.');
+        }
+        
+        if (typeof window.supabase.createClient !== 'function') {
+            throw new Error('Supabase createClient function not available.');
+        }
+        
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        if (!client) {
+            throw new Error('Failed to create Supabase client instance.');
+        }
+        
+        console.log('✅ Supabase client initialized successfully');
+        return client;
+    } catch (error) {
+        console.error('Error initializing Supabase client:', error);
+        showAlert('Database connection failed - running in demo mode. Feedback generation still works!', 'warning');
+        return null;
+    }
+}
+
+async function verifySupabaseConnection(client) {
+    if (!client) return;
+    
+    try {
+        const { data, error } = await client
+            .from('reflections')
+            .select('count')
+            .limit(1);
+        
+        if (error) {
+            console.error('Database connection test failed:', error);
+            showAlert('Database connection issue - data may not be saved.', 'warning');
+        } else {
+            console.log('✅ Supabase connection verified');
+        }
+    } catch (error) {
+        console.error('Error verifying Supabase connection:', error);
+    }
+}
+
+function getOrCreateSessionId() {
+    let sessionId = sessionStorage.getItem('session_id');
+    
+    if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem('session_id', sessionId);
+        console.log('✅ New session created:', sessionId);
+    } else {
+        console.log('✅ Existing session found:', sessionId);
+    }
+    
+    return sessionId;
+}
+
+async function logEvent(eventType, eventData = {}) {
+    if (!supabase || !currentSessionId) {
+        console.log(`Event (no DB): ${eventType}`, eventData);
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('user_events')
+            .insert([{
+                session_id: currentSessionId,
+                reflection_id: eventData.reflection_id || null,
+                event_type: eventType,
+                event_data: eventData,
+                user_agent: navigator.userAgent,
+                language: currentLanguage,
+                timestamp_utc: new Date().toISOString()
+            }]);
+
+        if (error) {
+            console.error('Error logging event:', error);
+        } else {
+            console.log(`📝 Event logged: ${eventType}`, eventData);
+        }
+    } catch (error) {
+        console.error('Error in logEvent:', error);
+    }
+}
+
+async function storeBinaryClassificationResults(analysisResult) {
+    if (!supabase || !currentSessionId || !currentParticipant || !currentVideoId) return;
+    
+    try {
+        const classificationRecords = analysisResult.classificationResults.map(result => ({
+            session_id: currentSessionId,
+            reflection_id: currentTaskState.currentReflectionId,
+            task_id: `video-task-${currentVideoId}`,
+            participant_name: currentParticipant,
+            video_id: currentVideoId,
+            language: currentLanguage,
+            window_id: result.window_id,
+            window_text: result.window_text,
+            description_score: result.description,
+            explanation_score: result.explanation,
+            prediction_score: result.prediction,
+            created_at: new Date().toISOString()
+        }));
+        
+        if (classificationRecords.length > 0) {
+            const { data, error } = await supabase
+                .from('binary_classifications')
+                .insert(classificationRecords);
+            
+            if (error) {
+                console.error('Error storing binary classifications:', error);
+            } else {
+                console.log(`✅ ${classificationRecords.length} binary classifications stored`);
+            }
+        }
+    } catch (error) {
+        console.error('Error in storeBinaryClassificationResults:', error);
+    }
+}
+
+async function saveFeedbackToDatabase(data) {
+    if (!supabase) {
+        console.log('No database connection - running in demo mode');
+        return;
+    }
+    
+    try {
+        const revisionNumber = currentTaskState.revisionCount || 1;
+        const parentReflectionId = currentTaskState.parentReflectionId || null;
+
+        const reflectionData = {
+            session_id: currentSessionId,
+            participant_name: data.participantCode,
+            video_id: data.videoSelected,
+            language: currentLanguage,
+            task_id: `video-task-${data.videoSelected}`,
+            reflection_text: data.reflectionText,
+            analysis_percentages: {
+                raw: data.analysisResult.percentages_raw,
+                priority: data.analysisResult.percentages_priority,
+                displayed_to_student: data.analysisResult.percentages_raw
+            },
+            weakest_component: data.analysisResult.weakest_component,
+            feedback_extended: data.extendedFeedback,
+            feedback_short: data.shortFeedback,
+            revision_number: revisionNumber,
+            parent_reflection_id: parentReflectionId,
+            created_at: new Date().toISOString()
+        };
+
+        const { data: result, error } = await supabase
+            .from('reflections')
+            .insert([reflectionData])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Database insert error:', error);
+            return;
+        }
+
+        currentTaskState.currentReflectionId = result.id;
+        
+        if (revisionNumber === 1) {
+            currentTaskState.parentReflectionId = result.id;
+        }
+        
+        console.log(`✅ Reflection saved to database:`, result.id);
+        
+        logEvent('submit_reflection', {
+            video_id: data.videoSelected,
+            participant_name: data.participantCode,
+            language: currentLanguage,
+            reflection_id: result.id,
+            reflection_length: data.reflectionText.length,
+            analysis_percentages_raw: data.analysisResult.percentages_raw,
+            analysis_percentages_priority: data.analysisResult.percentages_priority,
+            weakest_component: data.analysisResult.weakest_component
+        });
+        
+    } catch (error) {
+        console.error('Error saving to database:', error);
+    }
+}
+
+// Session end tracking
+window.addEventListener('beforeunload', () => {
+    if (currentTaskState.currentFeedbackType && currentTaskState.currentFeedbackStartTime) {
+        endFeedbackViewing(currentTaskState.currentFeedbackType, currentLanguage);
+    }
+    
+    logEvent('session_end', {
+        session_duration: Date.now() - performance.timing.navigationStart,
+        language: currentLanguage,
+        final_page: currentPage,
+        video_id: currentVideoId
+    });
+});
