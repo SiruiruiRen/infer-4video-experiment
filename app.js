@@ -132,6 +132,7 @@ const translations = {
         pre_survey_completed: "Pre-Survey Completed",
         pre_survey_completed_message: "You have already completed the pre-survey. You can review it below or continue to the dashboard.",
         view_pre_survey: "View",
+        presurvey_required: "You must complete the pre-survey before accessing video tasks.",
         video_tasks: "Video Tasks",
         thank_you_title: "Thank You!",
         participation_complete: "Your participation is complete",
@@ -228,6 +229,7 @@ const translations = {
         pre_survey_completed: "Vor-Umfrage abgeschlossen",
         pre_survey_completed_message: "Sie haben die Vor-Umfrage bereits abgeschlossen. Sie können sie unten überprüfen oder zum Dashboard fortfahren.",
         view_pre_survey: "Ansehen",
+        presurvey_required: "Sie müssen die Vor-Umfrage abschließen, bevor Sie auf Video-Aufgaben zugreifen können.",
         video_tasks: "Video-Aufgaben",
         thank_you_title: "Vielen Dank!",
         participation_complete: "Ihre Teilnahme ist abgeschlossen",
@@ -657,21 +659,33 @@ function updatePreSurveyStatus() {
     const isCompleted = currentParticipantProgress?.pre_survey_completed || false;
     const badge = document.getElementById('presurvey-status-badge');
     const viewBtn = document.getElementById('go-to-presurvey-btn');
+    const warning = document.getElementById('presurvey-warning');
     
     if (badge) {
         if (isCompleted) {
-            badge.className = 'badge bg-success';
-            badge.textContent = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
+            badge.className = 'badge bg-success d-block mb-2';
+            badge.textContent = currentLanguage === 'en' ? '✓ Completed' : '✓ Abgeschlossen';
         } else {
-            badge.className = 'badge bg-warning';
-            badge.textContent = currentLanguage === 'en' ? 'Not Started' : 'Nicht gestartet';
+            badge.className = 'badge bg-danger d-block mb-2';
+            badge.textContent = currentLanguage === 'en' ? '⚠ Required' : '⚠ Erforderlich';
         }
     }
     
     if (viewBtn) {
         viewBtn.textContent = isCompleted 
             ? (currentLanguage === 'en' ? 'Review' : 'Ansehen')
-            : (currentLanguage === 'en' ? 'Start' : 'Starten');
+            : (currentLanguage === 'en' ? 'Start Now' : 'Jetzt starten');
+        viewBtn.className = isCompleted
+            ? 'btn btn-sm btn-outline-primary w-100'
+            : 'btn btn-sm btn-primary w-100';
+    }
+    
+    if (warning) {
+        if (!isCompleted) {
+            warning.classList.remove('d-none');
+        } else {
+            warning.classList.add('d-none');
+        }
     }
 }
 
@@ -713,7 +727,12 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     
     const completedText = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
     const startText = currentLanguage === 'en' ? 'Start Video' : 'Video starten';
+    const continueText = currentLanguage === 'en' ? 'Continue' : 'Fortsetzen';
     const surveyText = currentLanguage === 'en' ? 'Survey Done' : 'Umfrage erledigt';
+    const preSurveyRequired = currentLanguage === 'en' ? 'Complete Pre-Survey First' : 'Zuerst Vor-Umfrage abschließen';
+    
+    // Check if pre-survey is completed
+    const canAccess = currentParticipantProgress?.pre_survey_completed || false;
     
     card.innerHTML = `
         <div class="card h-100 video-card ${isCompleted ? 'completed' : ''}" data-video-id="${video.id}">
@@ -724,17 +743,28 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
                     ? `<div>
                         <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> ${completedText}</span>
                         ${surveyCompleted ? `<div><small class="text-muted"><i class="bi bi-clipboard-check"></i> ${surveyText}</small></div>` : ''}
+                        <button class="btn btn-outline-primary btn-sm mt-2 view-video-btn" data-video-id="${video.id}">${continueText}</button>
                        </div>`
-                    : `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${startText}</button>`
+                    : canAccess
+                        ? `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${startText}</button>`
+                        : `<button class="btn btn-secondary start-video-btn" data-video-id="${video.id}" disabled title="${preSurveyRequired}">${startText}</button>`
                 }
             </div>
         </div>
     `;
     
-    // Add click handler for start button
+    // Add click handler for start/continue button
     const startBtn = card.querySelector('.start-video-btn');
-    if (startBtn) {
+    const viewBtn = card.querySelector('.view-video-btn');
+    
+    if (startBtn && canAccess) {
         startBtn.addEventListener('click', () => {
+            startVideoTask(video.id);
+        });
+    }
+    
+    if (viewBtn) {
+        viewBtn.addEventListener('click', () => {
             startVideoTask(video.id);
         });
     }
@@ -743,7 +773,18 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
 }
 
 // Start video task
-function startVideoTask(videoId) {
+async function startVideoTask(videoId) {
+    // Check if pre-survey is completed
+    if (!currentParticipantProgress?.pre_survey_completed) {
+        const message = currentLanguage === 'en'
+            ? 'Please complete the pre-survey before starting video tasks.'
+            : 'Bitte vervollständigen Sie die Vor-Umfrage, bevor Sie mit den Video-Aufgaben beginnen.';
+        showAlert(message, 'warning');
+        showPage('presurvey');
+        loadSurvey('pre');
+        return;
+    }
+    
     currentVideoId = videoId;
     const video = VIDEOS.find(v => v.id === videoId);
     
@@ -760,6 +801,125 @@ function startVideoTask(videoId) {
     if (codeEl) codeEl.value = currentParticipant;
     if (videoNameEl) videoNameEl.value = video.name;
     
+    // Load previous reflection and feedback for this video
+    await loadPreviousReflectionAndFeedback(videoId);
+    
+    // Show percentage explanation
+    const explanationEl = document.getElementById('percentage-explanation');
+    if (explanationEl) explanationEl.classList.remove('d-none');
+    
+    // Show task page
+    showPage('video-task');
+    
+    logEvent('video_task_started', {
+        video_id: videoId,
+        participant_name: currentParticipant
+    });
+}
+
+// Load previous reflection and feedback for a video
+async function loadPreviousReflectionAndFeedback(videoId) {
+    if (!supabase || !currentParticipant) {
+        // No database, start fresh
+        resetTaskState();
+        return;
+    }
+    
+    try {
+        // Get the most recent reflection for this video and participant
+        const { data: reflection, error } = await supabase
+            .from('reflections')
+            .select('*')
+            .eq('participant_name', currentParticipant)
+            .eq('video_id', videoId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+            console.error('Error loading previous reflection:', error);
+            resetTaskState();
+            return;
+        }
+        
+        if (reflection) {
+            // Load previous reflection text
+            const reflectionText = document.getElementById('task-reflection-text');
+            if (reflectionText && reflection.reflection_text) {
+                reflectionText.value = reflection.reflection_text;
+                updateWordCount();
+            }
+            
+            // Load previous feedback if available
+            if (reflection.feedback_extended || reflection.feedback_short) {
+                const feedbackExtended = document.getElementById('task-feedback-extended');
+                const feedbackShort = document.getElementById('task-feedback-short');
+                const feedbackTabs = document.getElementById('task-feedback-tabs');
+                const reviseBtn = document.getElementById('task-revise-btn');
+                const submitBtn = document.getElementById('task-submit-final');
+                
+                if (reflection.feedback_extended && feedbackExtended) {
+                    const analysisResult = reflection.analysis_percentages ? {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    } : null;
+                    feedbackExtended.innerHTML = formatStructuredFeedback(reflection.feedback_extended, analysisResult);
+                }
+                
+                if (reflection.feedback_short && feedbackShort) {
+                    const analysisResult = reflection.analysis_percentages ? {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    } : null;
+                    feedbackShort.innerHTML = formatStructuredFeedback(reflection.feedback_short, analysisResult);
+                }
+                
+                // Show feedback tabs and buttons
+                if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+                if (reviseBtn) reviseBtn.style.display = 'inline-block';
+                if (submitBtn) submitBtn.style.display = 'block';
+                
+                // Display analysis distribution if available
+                if (reflection.analysis_percentages) {
+                    const analysisResult = {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    };
+                    displayAnalysisDistribution(analysisResult);
+                }
+                
+                // Update task state
+                currentTaskState = {
+                    feedbackGenerated: true,
+                    submitted: reflection.revision_number > 1, // Consider submitted if multiple revisions
+                    currentReflectionId: reflection.id,
+                    parentReflectionId: reflection.parent_reflection_id,
+                    revisionCount: reflection.revision_number || 1,
+                    currentFeedbackType: null,
+                    currentFeedbackStartTime: null
+                };
+                
+                // Store reflection for duplicate detection
+                sessionStorage.setItem(`reflection-${videoId}`, reflection.reflection_text);
+            } else {
+                // No feedback yet, reset state
+                resetTaskState();
+            }
+        } else {
+            // No previous reflection, start fresh
+            resetTaskState();
+        }
+    } catch (error) {
+        console.error('Error in loadPreviousReflectionAndFeedback:', error);
+        resetTaskState();
+    }
+}
+
+// Reset task state (for new video or when no previous work exists)
+function resetTaskState() {
     // Reset task state
     currentTaskState = {
         feedbackGenerated: false,
@@ -784,27 +944,12 @@ function startVideoTask(videoId) {
     const reviseBtn = document.getElementById('task-revise-btn');
     const submitBtn = document.getElementById('task-submit-final');
     
-    if (feedbackExtended) feedbackExtended.innerHTML = '';
-    if (feedbackShort) feedbackShort.innerHTML = '';
+    if (feedbackExtended) feedbackExtended.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
+    if (feedbackShort) feedbackShort.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
     if (feedbackTabs) feedbackTabs.classList.add('d-none');
     if (analysisDist) analysisDist.remove(); // Remove analysis distribution if exists
     if (reviseBtn) reviseBtn.style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
-    
-    // Clear any stored reflection for this video
-    sessionStorage.removeItem(`reflection-${videoId}`);
-    
-    // Show percentage explanation
-    const explanationEl = document.getElementById('percentage-explanation');
-    if (explanationEl) explanationEl.classList.remove('d-none');
-    
-    // Show task page
-    showPage('video-task');
-    
-    logEvent('video_task_started', {
-        video_id: videoId,
-        participant_name: currentParticipant
-    });
 }
 
 // Update progress bar
