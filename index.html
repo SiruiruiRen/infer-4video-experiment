@@ -11,19 +11,107 @@
 <body>
     <div id="alert-container"></div>
     
-    <!-- Progress Bar (hidden on login page) -->
-    <div class="progress-container" id="progress-container" style="display: none;">
-        <div class="progress" style="height: 6px;">
-            <div class="progress-bar bg-primary" role="progressbar" id="study-progress" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <!-- Persistent Navigation Bar (visible on all pages except welcome/login/thankyou) -->
+    <nav id="main-navigation" class="main-navigation d-none" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1050; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 0.75rem 0;">
+        <div class="main-container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button id="nav-dashboard-btn" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span data-lang-key="back_to_dashboard">Back to Dashboard</span>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3 small" id="nav-participant-name"></span>
+                    <div class="language-switcher-container-inline"></div>
+                </div>
+            </div>
         </div>
-        <div class="progress-text text-center mt-2">
-            <small class="text-muted" id="progress-text">Study Progress</small>
+    </nav>
+    
+    <!-- Progress Bar Removed -->
+
+    <!-- Page 0: Welcome & Consent -->
+    <div id="page-welcome" class="page-container">
+        <div class="language-switcher-container my-3"></div>
+        <div class="main-container">
+            <div class="header-full-width">
+                <div class="main-container">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 d-flex align-items-center">
+                            <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                            <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
+                        </div>
+                        <div class="col-md-8 text-center">
+                            <h1 data-lang-key="title" class="mb-0">INFER</h1>
+                            <p data-lang-key="subtitle" class="mb-0">An intelligent feedback system for observing classroom videos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3 data-lang-key="welcome_to_infer" class="mb-3">Welcome to INFER</h3>
+                            <p data-lang-key="welcome_message">Thank you for participating in this study on AI-supported teaching reflection. Over the next 2.5 weeks, you will analyze 4 teaching videos using our INFER system.</p>
+                            
+                            <!-- Browser Recommendation -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span data-lang-key="browser_recommendation">For the best experience, we recommend using <strong>Google Chrome</strong>.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Consent -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 data-lang-key="data_consent_header">Data Protection Consent</h5>
+                        </div>
+                        <div class="card-body">
+                            <p data-lang-key="data_consent_intro">While processing the lesson analysis, your data will be stored anonymously. After the lesson analysis, you will be asked to answer a few short questions about your experience and how you found the tool. This data will also be stored anonymously. Your answers will help us to continuously improve the tool. Please agree to allow us to use your data for scientific purposes.</p>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="data-consent" id="data-consent-agree" value="agree" required>
+                                    <label class="form-check-label" for="data-consent-agree" data-lang-key="data_consent_agree">
+                                        I agree to the use of the data for scientific purposes.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="data-consent" id="data-consent-disagree" value="disagree">
+                                    <label class="form-check-label" for="data-consent-disagree" data-lang-key="data_consent_disagree">
+                                        I do not agree to the use of the data for scientific purposes.
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="consent-disagreement-message" class="alert alert-warning d-none">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <span data-lang-key="consent_disagreement_message">
+                                    Unfortunately, you cannot participate without consent to data use. Thank you for your interest.
+                                </span>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button id="continue-to-login" class="btn btn-primary btn-lg" disabled>
+                                    <i class="bi bi-arrow-right me-2"></i>
+                                    <span data-lang-key="continue_button">Continue</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Page 1: Login/Resume -->
-    <div id="page-login" class="page-container">
+    <div id="page-login" class="page-container d-none">
         <div class="language-switcher-container"></div>
+        <!-- No navigation bar on login page -->
         <div class="header-full-width">
             <div class="main-container">
                 <div class="row align-items-center">
@@ -72,14 +160,14 @@
     </div>
 
     <!-- Page 2: Pre-Survey -->
-    <div id="page-presurvey" class="page-container d-none">
-        <div class="language-switcher-container"></div>
+    <div id="page-presurvey" class="page-container d-none" style="margin-top: 60px;">
+        <!-- Navigation bar will be shown -->
         <div class="header-full-width">
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
                         <h1 class="mb-0" data-lang-key="pre_survey_title">Pre-Survey</h1>
@@ -131,14 +219,14 @@
     </div>
 
     <!-- Page 3: Dashboard -->
-    <div id="page-dashboard" class="page-container d-none">
-        <div class="language-switcher-container"></div>
+    <div id="page-dashboard" class="page-container d-none" style="margin-top: 60px;">
+        <!-- Navigation bar will be shown -->
         <div class="header-full-width">
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
                         <h1 class="mb-0" data-lang-key="dashboard_title">Video Dashboard</h1>
@@ -213,25 +301,24 @@
         </div>
     </div>
 
-    <!-- Page 4-7: Video Task Pages (4 videos) -->
-    <div id="page-video-task" class="page-container d-none">
+    <!-- Page 4: Video 1 Task Page -->
+    <div id="page-video-1" class="page-container d-none video-task-page" data-video-id="video1" style="margin-top: 60px;">
         <div class="language-switcher-container"></div>
         <div class="header-full-width">
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
-                        <h1 class="mb-0" id="video-task-title" data-lang-key="video_task_title">Video Task</h1>
-                        <p class="mb-0" id="video-task-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
+                        <h1 class="mb-0" id="video-1-title" data-lang-key="video_task_title">Video 1 Task</h1>
+                        <p class="mb-0" id="video-1-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="main-container">
-
             <div class="row">
                 <!-- Settings Panel -->
                 <div class="col-md-2">
@@ -240,54 +327,48 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
-                                <input type="text" class="form-control" id="task-participant-code" readonly>
+                                <input type="text" class="form-control" id="video-1-participant-code" readonly>
                             </div>
-                            
                             <div class="mb-3">
                                 <label class="form-label" data-lang-key="video_label">Video:</label>
-                                <input type="text" class="form-control" id="task-video-name" readonly>
+                                <input type="text" class="form-control" id="video-1-video-name" readonly>
                             </div>
-                            
                             <div class="language-toggle mb-3">
                                 <label data-lang-key="language">Language:</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-en">
-                                    <label class="form-check-label" for="task-lang-en">English</label>
+                                    <input class="form-check-input" type="radio" name="video-1-language" id="video-1-lang-en">
+                                    <label class="form-check-label" for="video-1-lang-en">English</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-de" checked>
-                                    <label class="form-check-label" for="task-lang-de">Deutsch</label>
+                                    <input class="form-check-input" type="radio" name="video-1-language" id="video-1-lang-de" checked>
+                                    <label class="form-check-label" for="video-1-lang-de">Deutsch</label>
                                 </div>
                             </div>
-                            
-                            <button id="back-to-dashboard" class="btn btn-outline-secondary btn-sm w-100" data-lang-key="back_to_dashboard">
+                            <button class="btn btn-outline-secondary btn-sm w-100 back-to-dashboard-btn" data-lang-key="back_to_dashboard">
                                 <i class="bi bi-arrow-left me-1"></i><span data-lang-key="back_to_dashboard">Back to Dashboard</span>
                             </button>
                         </div>
                     </div>
                 </div>
-
                 <!-- Input Panel -->
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-header" data-lang-key="reflection_input">Student Teacher Reflection</div>
                         <div class="card-body d-flex flex-column position-relative">
-                            <textarea id="task-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
-                            
+                            <textarea id="video-1-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
                             <div class="input-actions mt-auto">
-                                <button id="task-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
-                                <div id="task-word-count-container" class="text-muted">
-                                    <span id="task-word-count">0</span> <span data-lang-key="words">words</span>
+                                <button id="video-1-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
+                                <div id="video-1-word-count-container" class="text-muted">
+                                    <span id="video-1-word-count">0</span> <span data-lang-key="words">words</span>
                                 </div>
-                                <button id="task-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
-                                <button id="task-submit-final" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
+                                <button id="video-1-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
+                                <button id="video-1-submit-btn" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
                                     <i class="bi bi-check-circle"></i> <span data-lang-key="submit_final">Submit Final Reflection</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Feedback Panel -->
                 <div class="col-md-6">
                     <div class="card h-100">
@@ -295,48 +376,44 @@
                             <span data-lang-key="generated_feedback">Generated Feedback</span>
                         </div>
                         <div class="card-body d-flex flex-column position-relative">
-                            <div id="task-loading-spinner" class="loading-spinner">
+                            <div id="video-1-loading-spinner" class="loading-spinner" style="display: none;">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
-                                <div id="task-loading-text" class="loading-message mt-3 small text-muted"></div>
+                                <div id="video-1-loading-text" class="loading-message mt-3 small text-muted"></div>
                             </div>
-                            
-                            <!-- Percentage Explanation -->
-                            <div id="percentage-explanation" class="alert alert-info d-none mb-3">
+                            <div id="video-1-percentage-explanation" class="alert alert-info d-none mb-3">
                                 <i class="bi bi-info-circle me-2"></i>
-                                <strong data-lang-key="note">Note:</strong> <span data-lang-key="percentage_explanation">The percentages may add up to more than 100% because a single passage can receive multiple codes (Description, Explanation, and Prediction).</span>
+                                <span data-lang-key="percentage_explanation_simple">Note: Percentages may exceed 100% as text can have multiple codes.</span>
                             </div>
-                            
-                            <div id="task-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
-                                <ul class="nav nav-tabs feedback-tabs d-none" id="task-feedback-tabs" role="tablist">
+                            <div id="video-1-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
+                                <ul class="nav nav-tabs feedback-tabs d-none" id="video-1-feedback-tabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="task-extended-tab" data-bs-toggle="tab" data-bs-target="#task-feedback-extended-pane" type="button" role="tab">Extended</button>
+                                        <button class="nav-link active" id="video-1-extended-tab" data-bs-toggle="tab" data-bs-target="#video-1-feedback-extended-pane" type="button" role="tab">Extended</button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="task-short-tab" data-bs-toggle="tab" data-bs-target="#task-feedback-short-pane" type="button" role="tab">Short</button>
+                                        <button class="nav-link" id="video-1-short-tab" data-bs-toggle="tab" data-bs-target="#video-1-feedback-short-pane" type="button" role="tab">Short</button>
                                     </li>
                                 </ul>
-                                <div class="tab-content" id="task-feedback-tab-content">
-                                    <div class="tab-pane fade show active" id="task-feedback-extended-pane" role="tabpanel">
-                                        <div id="task-feedback-extended" class="feedback-content">
+                                <div class="tab-content" id="video-1-feedback-tab-content">
+                                    <div class="tab-pane fade show active" id="video-1-feedback-extended-pane" role="tabpanel">
+                                        <div id="video-1-feedback-extended" class="feedback-content">
                                             <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="task-feedback-short-pane" role="tabpanel">
-                                        <div id="task-feedback-short" class="feedback-content">
+                                    <div class="tab-pane fade" id="video-1-feedback-short-pane" role="tabpanel">
+                                        <div id="video-1-feedback-short" class="feedback-content">
                                             <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="mt-auto">
                                 <div class="feedback-options">
-                                    <button id="task-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
+                                    <button id="video-1-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
                                         <i class="bi bi-clipboard"></i> <span data-lang-key="copy">Copy</span>
                                     </button>
-                                    <button id="task-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
+                                    <button id="video-1-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
                                         <i class="bi bi-pencil-square"></i> <span data-lang-key="revise_reflection">Revise Reflection</span>
                                     </button>
                                 </div>
@@ -345,10 +422,9 @@
                     </div>
                 </div>
             </div>
-
             <!-- Definitions Section -->
             <div class="definitions-section mt-4">
-                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#task-definitions-content" aria-expanded="false" role="button">
+                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#video-1-definitions-content" aria-expanded="false" role="button">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <h5 class="mb-2">
@@ -362,7 +438,487 @@
                         </div>
                     </div>
                 </div>
-                <div class="collapse" id="task-definitions-content">
+                <div class="collapse" id="video-1-definitions-content">
+                    <div class="definitions-grid">
+                        <div class="definition-card description-card">
+                            <div class="definition-icon">📝</div>
+                            <h6 data-lang-key="description">Description</h6>
+                            <p data-lang-key="description_def">Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
+                        </div>
+                        <div class="definition-card explanation-card">
+                            <div class="definition-icon">🔍</div>
+                            <h6 data-lang-key="explanation">Explanation</h6>
+                            <p data-lang-key="explanation_def">Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
+                        </div>
+                        <div class="definition-card prediction-card">
+                            <div class="definition-icon">🔮</div>
+                            <h6 data-lang-key="prediction">Prediction</h6>
+                            <p data-lang-key="prediction_def">Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 5: Video 2 Task Page -->
+    <div id="page-video-2" class="page-container d-none video-task-page" data-video-id="video2" style="margin-top: 60px;">
+        <div class="language-switcher-container"></div>
+        <div class="header-full-width">
+            <div class="main-container">
+                <div class="row align-items-center">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        <h1 class="mb-0" id="video-2-title" data-lang-key="video_task_title">Video 2 Task</h1>
+                        <p class="mb-0" id="video-2-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div class="row">
+                <!-- Settings Panel -->
+                <div class="col-md-2">
+                    <div class="card">
+                        <div class="card-header" data-lang-key="settings">Settings</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
+                                <input type="text" class="form-control" id="video-2-participant-code" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="video_label">Video:</label>
+                                <input type="text" class="form-control" id="video-2-video-name" readonly>
+                            </div>
+                            <div class="language-toggle mb-3">
+                                <label data-lang-key="language">Language:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-2-language" id="video-2-lang-en">
+                                    <label class="form-check-label" for="video-2-lang-en">English</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-2-language" id="video-2-lang-de" checked>
+                                    <label class="form-check-label" for="video-2-lang-de">Deutsch</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm w-100 back-to-dashboard-btn" data-lang-key="back_to_dashboard">
+                                <i class="bi bi-arrow-left me-1"></i><span data-lang-key="back_to_dashboard">Back to Dashboard</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Panel -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header" data-lang-key="reflection_input">Student Teacher Reflection</div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <textarea id="video-2-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
+                            <div class="input-actions mt-auto">
+                                <button id="video-2-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
+                                <div id="video-2-word-count-container" class="text-muted">
+                                    <span id="video-2-word-count">0</span> <span data-lang-key="words">words</span>
+                                </div>
+                                <button id="video-2-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
+                                <button id="video-2-submit-btn" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
+                                    <i class="bi bi-check-circle"></i> <span data-lang-key="submit_final">Submit Final Reflection</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feedback Panel -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span data-lang-key="generated_feedback">Generated Feedback</span>
+                        </div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <div id="video-2-loading-spinner" class="loading-spinner" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="video-2-loading-text" class="loading-message mt-3 small text-muted"></div>
+                            </div>
+                            <div id="video-2-percentage-explanation" class="alert alert-info d-none mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span data-lang-key="percentage_explanation_simple">Note: Percentages may exceed 100% as text can have multiple codes.</span>
+                            </div>
+                            <div id="video-2-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
+                                <ul class="nav nav-tabs feedback-tabs d-none" id="video-2-feedback-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="video-2-extended-tab" data-bs-toggle="tab" data-bs-target="#video-2-feedback-extended-pane" type="button" role="tab">Extended</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="video-2-short-tab" data-bs-toggle="tab" data-bs-target="#video-2-feedback-short-pane" type="button" role="tab">Short</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="video-2-feedback-tab-content">
+                                    <div class="tab-pane fade show active" id="video-2-feedback-extended-pane" role="tabpanel">
+                                        <div id="video-2-feedback-extended" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="video-2-feedback-short-pane" role="tabpanel">
+                                        <div id="video-2-feedback-short" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="feedback-options">
+                                    <button id="video-2-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
+                                        <i class="bi bi-clipboard"></i> <span data-lang-key="copy">Copy</span>
+                                    </button>
+                                    <button id="video-2-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
+                                        <i class="bi bi-pencil-square"></i> <span data-lang-key="revise_reflection">Revise Reflection</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Definitions Section -->
+            <div class="definitions-section mt-4">
+                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#video-2-definitions-content" aria-expanded="false" role="button">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                                <span data-lang-key="learn_key_concepts">Learn the Key Concepts for Better Reflection</span>
+                            </h5>
+                            <p class="mb-0 text-muted" data-lang-key="concepts_help">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
+                        </div>
+                        <div class="expand-indicator">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse" id="video-2-definitions-content">
+                    <div class="definitions-grid">
+                        <div class="definition-card description-card">
+                            <div class="definition-icon">📝</div>
+                            <h6 data-lang-key="description">Description</h6>
+                            <p data-lang-key="description_def">Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
+                        </div>
+                        <div class="definition-card explanation-card">
+                            <div class="definition-icon">🔍</div>
+                            <h6 data-lang-key="explanation">Explanation</h6>
+                            <p data-lang-key="explanation_def">Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
+                        </div>
+                        <div class="definition-card prediction-card">
+                            <div class="definition-icon">🔮</div>
+                            <h6 data-lang-key="prediction">Prediction</h6>
+                            <p data-lang-key="prediction_def">Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 6: Video 3 Task Page -->
+    <div id="page-video-3" class="page-container d-none video-task-page" data-video-id="video3" style="margin-top: 60px;">
+        <div class="language-switcher-container"></div>
+        <div class="header-full-width">
+            <div class="main-container">
+                <div class="row align-items-center">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        <h1 class="mb-0" id="video-3-title" data-lang-key="video_task_title">Video 3 Task</h1>
+                        <p class="mb-0" id="video-3-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div class="row">
+                <!-- Settings Panel -->
+                <div class="col-md-2">
+                    <div class="card">
+                        <div class="card-header" data-lang-key="settings">Settings</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
+                                <input type="text" class="form-control" id="video-3-participant-code" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="video_label">Video:</label>
+                                <input type="text" class="form-control" id="video-3-video-name" readonly>
+                            </div>
+                            <div class="language-toggle mb-3">
+                                <label data-lang-key="language">Language:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-3-language" id="video-3-lang-en">
+                                    <label class="form-check-label" for="video-3-lang-en">English</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-3-language" id="video-3-lang-de" checked>
+                                    <label class="form-check-label" for="video-3-lang-de">Deutsch</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm w-100 back-to-dashboard-btn" data-lang-key="back_to_dashboard">
+                                <i class="bi bi-arrow-left me-1"></i><span data-lang-key="back_to_dashboard">Back to Dashboard</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Panel -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header" data-lang-key="reflection_input">Student Teacher Reflection</div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <textarea id="video-3-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
+                            <div class="input-actions mt-auto">
+                                <button id="video-3-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
+                                <div id="video-3-word-count-container" class="text-muted">
+                                    <span id="video-3-word-count">0</span> <span data-lang-key="words">words</span>
+                                </div>
+                                <button id="video-3-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
+                                <button id="video-3-submit-btn" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
+                                    <i class="bi bi-check-circle"></i> <span data-lang-key="submit_final">Submit Final Reflection</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feedback Panel -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span data-lang-key="generated_feedback">Generated Feedback</span>
+                        </div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <div id="video-3-loading-spinner" class="loading-spinner" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="video-3-loading-text" class="loading-message mt-3 small text-muted"></div>
+                            </div>
+                            <div id="video-3-percentage-explanation" class="alert alert-info d-none mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span data-lang-key="percentage_explanation_simple">Note: Percentages may exceed 100% as text can have multiple codes.</span>
+                            </div>
+                            <div id="video-3-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
+                                <ul class="nav nav-tabs feedback-tabs d-none" id="video-3-feedback-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="video-3-extended-tab" data-bs-toggle="tab" data-bs-target="#video-3-feedback-extended-pane" type="button" role="tab">Extended</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="video-3-short-tab" data-bs-toggle="tab" data-bs-target="#video-3-feedback-short-pane" type="button" role="tab">Short</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="video-3-feedback-tab-content">
+                                    <div class="tab-pane fade show active" id="video-3-feedback-extended-pane" role="tabpanel">
+                                        <div id="video-3-feedback-extended" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="video-3-feedback-short-pane" role="tabpanel">
+                                        <div id="video-3-feedback-short" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="feedback-options">
+                                    <button id="video-3-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
+                                        <i class="bi bi-clipboard"></i> <span data-lang-key="copy">Copy</span>
+                                    </button>
+                                    <button id="video-3-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
+                                        <i class="bi bi-pencil-square"></i> <span data-lang-key="revise_reflection">Revise Reflection</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Definitions Section -->
+            <div class="definitions-section mt-4">
+                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#video-3-definitions-content" aria-expanded="false" role="button">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                                <span data-lang-key="learn_key_concepts">Learn the Key Concepts for Better Reflection</span>
+                            </h5>
+                            <p class="mb-0 text-muted" data-lang-key="concepts_help">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
+                        </div>
+                        <div class="expand-indicator">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse" id="video-3-definitions-content">
+                    <div class="definitions-grid">
+                        <div class="definition-card description-card">
+                            <div class="definition-icon">📝</div>
+                            <h6 data-lang-key="description">Description</h6>
+                            <p data-lang-key="description_def">Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
+                        </div>
+                        <div class="definition-card explanation-card">
+                            <div class="definition-icon">🔍</div>
+                            <h6 data-lang-key="explanation">Explanation</h6>
+                            <p data-lang-key="explanation_def">Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
+                        </div>
+                        <div class="definition-card prediction-card">
+                            <div class="definition-icon">🔮</div>
+                            <h6 data-lang-key="prediction">Prediction</h6>
+                            <p data-lang-key="prediction_def">Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 7: Video 4 Task Page -->
+    <div id="page-video-4" class="page-container d-none video-task-page" data-video-id="video4" style="margin-top: 60px;">
+        <div class="language-switcher-container"></div>
+        <div class="header-full-width">
+            <div class="main-container">
+                <div class="row align-items-center">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        <h1 class="mb-0" id="video-4-title" data-lang-key="video_task_title">Video 4 Task</h1>
+                        <p class="mb-0" id="video-4-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div class="row">
+                <!-- Settings Panel -->
+                <div class="col-md-2">
+                    <div class="card">
+                        <div class="card-header" data-lang-key="settings">Settings</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
+                                <input type="text" class="form-control" id="video-4-participant-code" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" data-lang-key="video_label">Video:</label>
+                                <input type="text" class="form-control" id="video-4-video-name" readonly>
+                            </div>
+                            <div class="language-toggle mb-3">
+                                <label data-lang-key="language">Language:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-4-language" id="video-4-lang-en">
+                                    <label class="form-check-label" for="video-4-lang-en">English</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="video-4-language" id="video-4-lang-de" checked>
+                                    <label class="form-check-label" for="video-4-lang-de">Deutsch</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm w-100 back-to-dashboard-btn" data-lang-key="back_to_dashboard">
+                                <i class="bi bi-arrow-left me-1"></i><span data-lang-key="back_to_dashboard">Back to Dashboard</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Panel -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header" data-lang-key="reflection_input">Student Teacher Reflection</div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <textarea id="video-4-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
+                            <div class="input-actions mt-auto">
+                                <button id="video-4-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
+                                <div id="video-4-word-count-container" class="text-muted">
+                                    <span id="video-4-word-count">0</span> <span data-lang-key="words">words</span>
+                                </div>
+                                <button id="video-4-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
+                                <button id="video-4-submit-btn" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
+                                    <i class="bi bi-check-circle"></i> <span data-lang-key="submit_final">Submit Final Reflection</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feedback Panel -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <span data-lang-key="generated_feedback">Generated Feedback</span>
+                        </div>
+                        <div class="card-body d-flex flex-column position-relative">
+                            <div id="video-4-loading-spinner" class="loading-spinner" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="video-4-loading-text" class="loading-message mt-3 small text-muted"></div>
+                            </div>
+                            <div id="video-4-percentage-explanation" class="alert alert-info d-none mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span data-lang-key="percentage_explanation_simple">Note: Percentages may exceed 100% as text can have multiple codes.</span>
+                            </div>
+                            <div id="video-4-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
+                                <ul class="nav nav-tabs feedback-tabs d-none" id="video-4-feedback-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="video-4-extended-tab" data-bs-toggle="tab" data-bs-target="#video-4-feedback-extended-pane" type="button" role="tab">Extended</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="video-4-short-tab" data-bs-toggle="tab" data-bs-target="#video-4-feedback-short-pane" type="button" role="tab">Short</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="video-4-feedback-tab-content">
+                                    <div class="tab-pane fade show active" id="video-4-feedback-extended-pane" role="tabpanel">
+                                        <div id="video-4-feedback-extended" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="video-4-feedback-short-pane" role="tabpanel">
+                                        <div id="video-4-feedback-short" class="feedback-content">
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="feedback-options">
+                                    <button id="video-4-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
+                                        <i class="bi bi-clipboard"></i> <span data-lang-key="copy">Copy</span>
+                                    </button>
+                                    <button id="video-4-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
+                                        <i class="bi bi-pencil-square"></i> <span data-lang-key="revise_reflection">Revise Reflection</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Definitions Section -->
+            <div class="definitions-section mt-4">
+                <div class="definitions-header" data-bs-toggle="collapse" data-bs-target="#video-4-definitions-content" aria-expanded="false" role="button">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                                <span data-lang-key="learn_key_concepts">Learn the Key Concepts for Better Reflection</span>
+                            </h5>
+                            <p class="mb-0 text-muted" data-lang-key="concepts_help">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
+                        </div>
+                        <div class="expand-indicator">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse" id="video-4-definitions-content">
                     <div class="definitions-grid">
                         <div class="definition-card description-card">
                             <div class="definition-icon">📝</div>
@@ -386,14 +942,14 @@
     </div>
 
     <!-- Page 8-11: Post-Video Surveys (4 surveys) -->
-    <div id="page-post-video-survey" class="page-container d-none">
+    <div id="page-post-video-survey" class="page-container d-none" style="margin-top: 60px;">
         <div class="language-switcher-container"></div>
         <div class="header-full-width">
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
                         <h1 class="mb-0" id="post-video-survey-title" data-lang-key="post_video_survey_title">Post-Video Survey</h1>
@@ -445,8 +1001,8 @@
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
                         <h1 class="mb-0" data-lang-key="final_post_survey_title">Final Post-Survey</h1>
@@ -498,8 +1054,8 @@
             <div class="main-container">
                 <div class="row align-items-center">
                     <div class="col-md-4 d-flex align-items-center">
-                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 90px; margin-right: 15px;">
-                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
+                        <img src="University-of-Tubingen-01.png" alt="University of Tübingen" style="height: 50px; margin-right: 15px;">
+                        <img src="UNC_logo.avif" alt="UNC Logo" style="height: 30px;">
                     </div>
                     <div class="col-md-8 text-center">
                         <h1 class="mb-0" data-lang-key="thank_you_title">Thank You!</h1>

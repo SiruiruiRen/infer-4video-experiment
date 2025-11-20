@@ -89,6 +89,8 @@ const translations = {
         all_videos_completed: "All Videos Completed!",
         final_survey_prompt: "Please complete the final post-survey to finish the experiment.",
         start_post_survey: "Start Post-Survey",
+        view_pre_survey: "View",
+        start_pre_survey: "Start Now",
         video_task_title: "Video Task",
         video_task_subtitle: "Analyze your teaching reflection and receive feedback",
         settings: "Settings",
@@ -139,6 +141,7 @@ const translations = {
         study_complete: "Study Complete!",
         thank_you_message: "Thank you for your time and thoughtful reflections.",
         contribution_message: "Your contributions help improve teacher education and feedback systems.",
+        percentage_explanation_simple: "Note: Percentages may exceed 100% as text can have multiple codes.",
         choose_feedback_style: "Choose Your Preferred Feedback Style",
         feedback_style_intro: "We generate two types of feedback. Which would you like to see first?",
         extended_description: "Detailed academic feedback with comprehensive analysis and educational theory references",
@@ -230,12 +233,27 @@ const translations = {
         pre_survey_completed_message: "Sie haben die Vor-Umfrage bereits abgeschlossen. Sie können sie unten überprüfen oder zum Dashboard fortfahren.",
         view_pre_survey: "Ansehen",
         presurvey_required: "Sie müssen die Vor-Umfrage abschließen, bevor Sie auf Video-Aufgaben zugreifen können.",
+        start_pre_survey: "Jetzt starten",
+        video_completed: "Abgeschlossen",
+        start_video: "Video starten",
+        continue_video: "Fortsetzen",
+        survey_completed: "Umfrage erledigt",
+        complete_presurvey_first: "Zuerst Vor-Umfrage abschließen",
+        data_consent_header: "Einverständniserklärung Datenschutz",
+        data_consent_intro: "Während der Bearbeitung der Unterrichtsanalyse werden ihre Daten anonymisiert gespeichert. Weiter werden sie nach der Unterrichtsanalyse gebeten, kurze Fragen zu ihren Erfahrungen und zum Umgang mit dem Tool auszufüllen. Auch diese Daten werden anonymisiert gespeichert. Ihre Antworten helfen uns das Tool stetig weiterzuentwickeln. Bitte stimmen sie zu, wenn wir ihre Daten dementsprechend für wissenschaftliche Zwecke nutzen dürfen.",
+        data_consent_agree: "Ich stimme der Nutzung der Daten für wissenschaftliche Zwecke zu.",
+        data_consent_disagree: "Ich stimme der Nutzung der Daten für wissenschaftliche Zwecke nicht zu.",
+        consent_disagreement_message: "Leider können Sie ohne Zustimmung zur Datennutzung nicht an der Studie teilnehmen. Vielen Dank für Ihr Interesse.",
+        welcome_to_infer: "Willkommen zu INFER",
+        welcome_message: "Vielen Dank für Ihre Teilnahme an dieser Studie zur KI-gestützten Unterrichtsreflexion. In den nächsten 2,5 Wochen werden Sie 4 Unterrichtsvideos mit unserem INFER-System analysieren.",
+        browser_recommendation: "Für die beste Erfahrung empfehlen wir die Verwendung von <strong>Google Chrome</strong>.",
         video_tasks: "Video-Aufgaben",
         thank_you_title: "Vielen Dank!",
         participation_complete: "Ihre Teilnahme ist abgeschlossen",
         study_complete: "Studie abgeschlossen!",
         thank_you_message: "Vielen Dank für Ihre Zeit und Ihre durchdachten Reflexionen.",
         contribution_message: "Ihre Beiträge helfen, die Lehrerausbildung und Feedback-Systeme zu verbessern.",
+        percentage_explanation_simple: "Hinweis: Prozentwerte können 100% überschreiten, da Text mehrere Codes haben kann.",
         choose_feedback_style: "Wählen Sie Ihren bevorzugten Feedback-Stil",
         feedback_style_intro: "Wir generieren zwei Arten von Feedback. Welches möchten Sie zuerst sehen?",
         extended_description: "Detailliertes akademisches Feedback mit umfassender Analyse und pädagogischen Theoriereferenzen",
@@ -280,15 +298,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeApp() {
     setupEventListeners();
     renderLanguageSwitchers();
+    renderLanguageSwitcherInNav();
     applyTranslations();
-    showPage('login');
+    showPage('welcome');
     
     // Set default language to German
     switchLanguage('de');
     
     // Log session start
     logEvent('session_start', {
-        entry_page: 'login',
+        entry_page: 'welcome',
         language: currentLanguage,
         user_agent: navigator.userAgent,
         screen_width: window.screen.width,
@@ -296,8 +315,47 @@ function initializeApp() {
     });
 }
 
+// Validate consent
+function validateConsent() {
+    const agreeRadio = document.getElementById('data-consent-agree');
+    const disagreeRadio = document.getElementById('data-consent-disagree');
+    const continueBtn = document.getElementById('continue-to-login');
+    const disagreementMsg = document.getElementById('consent-disagreement-message');
+    
+    if (agreeRadio && agreeRadio.checked) {
+        if (continueBtn) continueBtn.disabled = false;
+        if (disagreementMsg) disagreementMsg.classList.add('d-none');
+    } else if (disagreeRadio && disagreeRadio.checked) {
+        if (continueBtn) continueBtn.disabled = true;
+        if (disagreementMsg) disagreementMsg.classList.remove('d-none');
+    }
+    
+    // Log consent interaction
+    logEvent('consent_interaction', {
+        consent_given: agreeRadio?.checked || false,
+        language: currentLanguage
+    });
+}
+
+// Handle consent continue
+function handleConsentContinue() {
+    const agreeRadio = document.getElementById('data-consent-agree');
+    if (agreeRadio && agreeRadio.checked) {
+        logEvent('consent_accepted', {
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
+        showPage('login');
+    }
+}
+
 // Setup event listeners
 function setupEventListeners() {
+    // Welcome/Consent page
+    document.getElementById('data-consent-agree')?.addEventListener('change', validateConsent);
+    document.getElementById('data-consent-disagree')?.addEventListener('change', validateConsent);
+    document.getElementById('continue-to-login')?.addEventListener('click', handleConsentContinue);
+    
     // Login page
     document.getElementById('login-button')?.addEventListener('click', handleLogin);
     document.getElementById('participant-code-input')?.addEventListener('keypress', (e) => {
@@ -308,6 +366,13 @@ function setupEventListeners() {
     document.getElementById('continue-after-presurvey')?.addEventListener('click', () => {
         markPreSurveyComplete();
         showPage('dashboard');
+    });
+    
+    // Persistent navigation - Dashboard button
+    document.getElementById('nav-dashboard-btn')?.addEventListener('click', () => {
+        if (currentParticipant) {
+            showPage('dashboard');
+        }
     });
     
     // Dashboard navigation
@@ -321,14 +386,12 @@ function setupEventListeners() {
         loadSurvey('post');
     });
     
-    // Video task
-    document.getElementById('task-generate-btn')?.addEventListener('click', () => handleGenerateFeedback());
-    document.getElementById('task-clear-btn')?.addEventListener('click', () => handleClear());
-    document.getElementById('task-copy-btn')?.addEventListener('click', () => handleCopy());
-    document.getElementById('task-revise-btn')?.addEventListener('click', () => handleRevise());
-    document.getElementById('task-submit-final')?.addEventListener('click', () => handleFinalSubmission());
-    document.getElementById('back-to-dashboard')?.addEventListener('click', () => showPage('dashboard'));
-    document.getElementById('task-reflection-text')?.addEventListener('input', () => updateWordCount());
+    // Back to dashboard buttons (now redundant but kept for compatibility)
+    document.querySelectorAll('.back-to-dashboard-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            showPage('dashboard');
+        });
+    });
     
     // Language switchers (for task page)
     document.getElementById('task-lang-en')?.addEventListener('change', () => switchLanguage('en'));
@@ -366,8 +429,13 @@ function setupEventListeners() {
     // Final submission modal
     document.getElementById('confirm-final-submission')?.addEventListener('click', () => {
         const modal = bootstrap.Modal.getInstance(document.getElementById('final-submission-modal'));
+        const videoNum = document.getElementById('final-submission-modal')?.dataset.videoNum;
         modal?.hide();
-        confirmFinalSubmission();
+        if (videoNum) {
+            confirmFinalSubmissionForVideo(parseInt(videoNum));
+        } else {
+            confirmFinalSubmission();
+        }
     });
     
     // Feedback preference modal
@@ -424,7 +492,7 @@ function handleTabSwitch() {
     }
 }
 
-// Page navigation
+// Page navigation - allows free navigation between pages
 function showPage(pageId) {
     document.querySelectorAll('.page-container').forEach(page => {
         page.classList.add('d-none');
@@ -436,16 +504,37 @@ function showPage(pageId) {
         const previousPage = currentPage;
         currentPage = pageId;
         
-        // Show/hide progress bar
-        const progressContainer = document.getElementById('progress-container');
-        if (progressContainer) {
-            progressContainer.style.display = (pageId === 'login' || pageId === 'thankyou') ? 'none' : 'block';
+        // Show/hide navigation bar (visible on all pages except welcome, login and thankyou)
+        const mainNav = document.getElementById('main-navigation');
+        if (mainNav) {
+            if (pageId === 'welcome' || pageId === 'login' || pageId === 'thankyou') {
+                mainNav.classList.add('d-none');
+            } else {
+                mainNav.classList.remove('d-none');
+                // Update participant name in nav
+                const navParticipantName = document.getElementById('nav-participant-name');
+                if (navParticipantName && currentParticipant) {
+                    navParticipantName.textContent = currentLanguage === 'en' 
+                        ? `Participant: ${currentParticipant}`
+                        : `Teilnehmer: ${currentParticipant}`;
+                }
+            }
         }
         
-        // Update progress bar
+        // Show/hide progress bar - REMOVED
+        /*
+        const progressContainer = document.getElementById('progress-container');
+        if (progressContainer) {
+            progressContainer.style.display = 'none';
+        }
+        */
+        
+        // Update progress bar - REMOVED
+        /*
         if (currentParticipantProgress) {
             updateProgressBar();
         }
+        */
         
         // Render dashboard if showing dashboard page
         if (pageId === 'dashboard' && currentParticipantProgress) {
@@ -454,8 +543,34 @@ function showPage(pageId) {
             }, 100);
         }
         
+        // Setup video page if it's a video page
+        if (pageId.startsWith('video-')) {
+            const videoNum = parseInt(pageId.replace('video-', ''));
+            setupVideoPageElements(videoNum);
+            
+            // Update video page titles/subtitles
+            const videoId = `video${videoNum}`;
+            const video = VIDEOS.find(v => v.id === videoId);
+            if (video) {
+                const ids = getVideoElementIds(videoNum);
+                const titleEl = document.getElementById(ids.title);
+                const subtitleEl = document.getElementById(ids.subtitle);
+                if (titleEl) {
+                    const titleText = currentLanguage === 'en' 
+                        ? `Video ${videoNum} Task: ${video.name}`
+                        : `Video ${videoNum} Aufgabe: ${video.name}`;
+                    titleEl.textContent = titleText;
+                }
+                if (subtitleEl) {
+                    subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
+                }
+            }
+        }
+        
         // Apply translations for new page
         applyTranslations();
+        renderLanguageSwitchers();
+        renderLanguageSwitcherInNav();
         
         // Log page view with participant info
         logEvent('page_view', {
@@ -466,6 +581,40 @@ function showPage(pageId) {
             language: currentLanguage,
             timestamp: new Date().toISOString()
         });
+    }
+}
+
+// Validate consent
+function validateConsent() {
+    const agreeRadio = document.getElementById('data-consent-agree');
+    const disagreeRadio = document.getElementById('data-consent-disagree');
+    const continueBtn = document.getElementById('continue-to-login');
+    const disagreementMsg = document.getElementById('consent-disagreement-message');
+    
+    if (agreeRadio && agreeRadio.checked) {
+        if (continueBtn) continueBtn.disabled = false;
+        if (disagreementMsg) disagreementMsg.classList.add('d-none');
+    } else if (disagreeRadio && disagreeRadio.checked) {
+        if (continueBtn) continueBtn.disabled = true;
+        if (disagreementMsg) disagreementMsg.classList.remove('d-none');
+    }
+    
+    // Log consent interaction
+    logEvent('consent_interaction', {
+        consent_given: agreeRadio?.checked || false,
+        language: currentLanguage
+    });
+}
+
+// Handle consent continue
+function handleConsentContinue() {
+    const agreeRadio = document.getElementById('data-consent-agree');
+    if (agreeRadio && agreeRadio.checked) {
+        logEvent('consent_accepted', {
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
+        showPage('login');
     }
 }
 
@@ -496,18 +645,10 @@ async function handleLogin() {
             resumeInfo.classList.remove('d-none');
         }
         
-        // Always show dashboard first, then optionally show pre-survey if not done
+        // Always show dashboard first - don't auto-navigate to pre-survey
         setTimeout(() => {
             showPage('dashboard');
             renderDashboard();
-            
-            // If pre-survey not done, show it after a brief delay
-            if (!progress.pre_survey_completed) {
-                setTimeout(() => {
-                    showPage('presurvey');
-                    loadSurvey('pre');
-                }, 2000);
-            }
         }, 1500);
     } else {
         // New participant
@@ -530,16 +671,10 @@ async function handleLogin() {
             assigned_condition: condition
         });
         
-        // Show dashboard first, then pre-survey
+        // Show dashboard first - don't auto-navigate to pre-survey
         setTimeout(() => {
             showPage('dashboard');
             renderDashboard();
-            
-            // Show pre-survey after dashboard loads
-            setTimeout(() => {
-                showPage('presurvey');
-                loadSurvey('pre');
-            }, 2000);
         }, 1500);
     }
 }
@@ -662,19 +797,21 @@ function updatePreSurveyStatus() {
     const warning = document.getElementById('presurvey-warning');
     
     if (badge) {
+        const t = translations[currentLanguage];
         if (isCompleted) {
             badge.className = 'badge bg-success d-block mb-2';
-            badge.textContent = currentLanguage === 'en' ? '✓ Completed' : '✓ Abgeschlossen';
+            badge.textContent = '✓ ' + (t.pre_survey_completed || 'Completed');
         } else {
             badge.className = 'badge bg-danger d-block mb-2';
-            badge.textContent = currentLanguage === 'en' ? '⚠ Required' : '⚠ Erforderlich';
+            badge.textContent = '⚠ ' + (currentLanguage === 'en' ? 'Required' : 'Erforderlich');
         }
     }
     
     if (viewBtn) {
+        const t = translations[currentLanguage];
         viewBtn.textContent = isCompleted 
-            ? (currentLanguage === 'en' ? 'Review' : 'Ansehen')
-            : (currentLanguage === 'en' ? 'Start Now' : 'Jetzt starten');
+            ? (t.view_pre_survey || 'View')
+            : (t.start_pre_survey || 'Start Now');
         viewBtn.className = isCompleted
             ? 'btn btn-sm btn-outline-primary w-100'
             : 'btn btn-sm btn-primary w-100';
@@ -725,29 +862,36 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     const card = document.createElement('div');
     card.className = 'col-md-6 col-lg-3';
     
-    const completedText = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
-    const startText = currentLanguage === 'en' ? 'Start Video' : 'Video starten';
-    const continueText = currentLanguage === 'en' ? 'Continue' : 'Fortsetzen';
-    const surveyText = currentLanguage === 'en' ? 'Survey Done' : 'Umfrage erledigt';
-    const preSurveyRequired = currentLanguage === 'en' ? 'Complete Pre-Survey First' : 'Zuerst Vor-Umfrage abschließen';
+    const t = translations[currentLanguage];
+    const completedText = t.video_completed || (currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen');
+    const startText = t.start_video || (currentLanguage === 'en' ? 'Start Video' : 'Video starten');
+    const continueText = t.continue_video || (currentLanguage === 'en' ? 'Continue' : 'Fortsetzen');
+    const surveyText = t.survey_completed || (currentLanguage === 'en' ? 'Survey Done' : 'Umfrage erledigt');
+    const preSurveyRequired = t.complete_presurvey_first || (currentLanguage === 'en' ? 'Complete Pre-Survey First' : 'Zuerst Vor-Umfrage abschließen');
     
     // Check if pre-survey is completed
     const canAccess = currentParticipantProgress?.pre_survey_completed || false;
     
+    // Button texts based on language
+    const btnCompletedText = t.video_completed;
+    const btnStartText = t.start_video;
+    const btnContinueText = t.continue_video;
+    const btnSurveyText = t.survey_completed;
+    
     card.innerHTML = `
         <div class="card h-100 video-card ${isCompleted ? 'completed' : ''}" data-video-id="${video.id}">
             <div class="card-body text-center">
-                <h5>Video ${number}</h5>
+                <h5>${currentLanguage === 'en' ? 'Video' : 'Video'} ${number}</h5>
                 <p class="text-muted small">${video.name}</p>
                 ${isCompleted 
                     ? `<div>
-                        <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> ${completedText}</span>
-                        ${surveyCompleted ? `<div><small class="text-muted"><i class="bi bi-clipboard-check"></i> ${surveyText}</small></div>` : ''}
-                        <button class="btn btn-outline-primary btn-sm mt-2 view-video-btn" data-video-id="${video.id}">${continueText}</button>
+                        <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> ${btnCompletedText}</span>
+                        ${surveyCompleted ? `<div><small class="text-muted"><i class="bi bi-clipboard-check"></i> ${btnSurveyText}</small></div>` : ''}
+                        <button class="btn btn-outline-primary btn-sm mt-2 view-video-btn" data-video-id="${video.id}">${btnContinueText}</button>
                        </div>`
                     : canAccess
-                        ? `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${startText}</button>`
-                        : `<button class="btn btn-secondary start-video-btn" data-video-id="${video.id}" disabled title="${preSurveyRequired}">${startText}</button>`
+                        ? `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${btnStartText}</button>`
+                        : `<button class="btn btn-secondary start-video-btn" data-video-id="${video.id}" disabled title="${preSurveyRequired}">${btnStartText}</button>`
                 }
             </div>
         </div>
@@ -772,6 +916,96 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     return card;
 }
 
+// Get video page number from video ID
+function getVideoPageNumber(videoId) {
+    const index = VIDEOS.findIndex(v => v.id === videoId);
+    return index >= 0 ? index + 1 : 1;
+}
+
+// Get element IDs for a specific video page
+function getVideoElementIds(videoNum) {
+    return {
+        title: `video-${videoNum}-title`,
+        subtitle: `video-${videoNum}-subtitle`,
+        participantCode: `video-${videoNum}-participant-code`,
+        videoName: `video-${videoNum}-video-name`,
+        reflectionText: `video-${videoNum}-reflection-text`,
+        wordCount: `video-${videoNum}-word-count`,
+        generateBtn: `video-${videoNum}-generate-btn`,
+        submitBtn: `video-${videoNum}-submit-btn`,
+        clearBtn: `video-${videoNum}-clear-btn`,
+        copyBtn: `video-${videoNum}-copy-btn`,
+        reviseBtn: `video-${videoNum}-revise-btn`,
+        loadingSpinner: `video-${videoNum}-loading-spinner`,
+        loadingText: `video-${videoNum}-loading-text`,
+        percentageExplanation: `video-${videoNum}-percentage-explanation`,
+        feedbackTabs: `video-${videoNum}-feedback-tabs`,
+        feedbackExtended: `video-${videoNum}-feedback-extended`,
+        feedbackShort: `video-${videoNum}-feedback-short`,
+        extendedTab: `video-${videoNum}-extended-tab`,
+        shortTab: `video-${videoNum}-short-tab`,
+        langEn: `video-${videoNum}-lang-en`,
+        langDe: `video-${videoNum}-lang-de`,
+        backBtn: `back-to-dashboard-btn`
+    };
+}
+
+// Setup event listeners for a specific video page
+function setupVideoPageElements(videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    
+    // Set up event listeners
+    const reflectionText = document.getElementById(ids.reflectionText);
+    if (reflectionText) {
+        reflectionText.addEventListener('input', () => updateWordCountForVideo(videoNum));
+    }
+    
+    const generateBtn = document.getElementById(ids.generateBtn);
+    if (generateBtn) {
+        generateBtn.addEventListener('click', () => handleGenerateFeedbackForVideo(videoNum));
+    }
+    
+    const clearBtn = document.getElementById(ids.clearBtn);
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => handleClearForVideo(videoNum));
+    }
+    
+    const copyBtn = document.getElementById(ids.copyBtn);
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => handleCopyForVideo(videoNum));
+    }
+    
+    const reviseBtn = document.getElementById(ids.reviseBtn);
+    if (reviseBtn) {
+        reviseBtn.addEventListener('click', () => handleReviseForVideo(videoNum));
+    }
+    
+    const submitBtn = document.getElementById(ids.submitBtn);
+    if (submitBtn) {
+        submitBtn.addEventListener('click', () => handleFinalSubmissionForVideo(videoNum));
+    }
+    
+    const extendedTab = document.getElementById(ids.extendedTab);
+    if (extendedTab) {
+        extendedTab.addEventListener('click', () => startFeedbackViewing('extended', currentLanguage));
+    }
+    
+    const shortTab = document.getElementById(ids.shortTab);
+    if (shortTab) {
+        shortTab.addEventListener('click', () => startFeedbackViewing('short', currentLanguage));
+    }
+    
+    const langEn = document.getElementById(ids.langEn);
+    if (langEn) {
+        langEn.addEventListener('change', () => switchLanguage('en'));
+    }
+    
+    const langDe = document.getElementById(ids.langDe);
+    if (langDe) {
+        langDe.addEventListener('change', () => switchLanguage('de'));
+    }
+}
+
 // Start video task
 async function startVideoTask(videoId) {
     // Check if pre-survey is completed
@@ -790,26 +1024,39 @@ async function startVideoTask(videoId) {
     
     if (!video) return;
     
-    // Update task page with video info
-    const titleEl = document.getElementById('video-task-title');
-    const subtitleEl = document.getElementById('video-task-subtitle');
-    const codeEl = document.getElementById('task-participant-code');
-    const videoNameEl = document.getElementById('task-video-name');
+    const videoNum = getVideoPageNumber(videoId);
+    const ids = getVideoElementIds(videoNum);
     
-    if (titleEl) titleEl.textContent = `Video Task: ${video.name}`;
-    if (subtitleEl) subtitleEl.textContent = 'Analyze your teaching reflection and receive feedback';
+    // Update task page with video info
+    const titleEl = document.getElementById(ids.title);
+    const subtitleEl = document.getElementById(ids.subtitle);
+    const codeEl = document.getElementById(ids.participantCode);
+    const videoNameEl = document.getElementById(ids.videoName);
+    
+    if (titleEl) {
+        const titleText = currentLanguage === 'en' 
+            ? `Video ${videoNum} Task: ${video.name}`
+            : `Video ${videoNum} Aufgabe: ${video.name}`;
+        titleEl.textContent = titleText;
+    }
+    if (subtitleEl) {
+        subtitleEl.setAttribute('data-lang-key', 'video_task_subtitle');
+        subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
+    }
     if (codeEl) codeEl.value = currentParticipant;
     if (videoNameEl) videoNameEl.value = video.name;
     
     // Load previous reflection and feedback for this video
-    await loadPreviousReflectionAndFeedback(videoId);
+    await loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum);
     
     // Show percentage explanation
-    const explanationEl = document.getElementById('percentage-explanation');
+    const explanationEl = document.getElementById(ids.percentageExplanation);
     if (explanationEl) explanationEl.classList.remove('d-none');
     
-    // Show task page
-    showPage('video-task');
+    // Show task page for this video (use page-video-X format)
+    const videoPageId = `video-${videoNum}`;
+    console.log(`Navigating to video page: ${videoPageId} for video ${videoId}`);
+    showPage(videoPageId);
     
     logEvent('video_task_started', {
         video_id: videoId,
@@ -817,7 +1064,110 @@ async function startVideoTask(videoId) {
     });
 }
 
-// Load previous reflection and feedback for a video
+// Load previous reflection and feedback for a specific video page
+async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
+    if (!supabase || !currentParticipant) {
+        // No database, start fresh
+        resetTaskStateForVideo(videoNum);
+        return;
+    }
+    
+    try {
+        // Get the most recent reflection for this video and participant
+        const { data: reflection, error } = await supabase
+            .from('reflections')
+            .select('*')
+            .eq('participant_name', currentParticipant)
+            .eq('video_id', videoId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+            console.error('Error loading previous reflection:', error);
+            resetTaskStateForVideo(videoNum);
+            return;
+        }
+        
+        const ids = getVideoElementIds(videoNum);
+        
+        if (reflection) {
+            // Load previous reflection text
+            const reflectionText = document.getElementById(ids.reflectionText);
+            if (reflectionText && reflection.reflection_text) {
+                reflectionText.value = reflection.reflection_text;
+                updateWordCountForVideo(videoNum);
+            }
+            
+            // Load previous feedback if available
+            if (reflection.feedback_extended || reflection.feedback_short) {
+                const feedbackExtended = document.getElementById(ids.feedbackExtended);
+                const feedbackShort = document.getElementById(ids.feedbackShort);
+                const feedbackTabs = document.getElementById(ids.feedbackTabs);
+                const reviseBtn = document.getElementById(ids.reviseBtn);
+                const submitBtn = document.getElementById(ids.submitBtn);
+                
+                if (reflection.feedback_extended && feedbackExtended) {
+                    const analysisResult = reflection.analysis_percentages ? {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    } : null;
+                    feedbackExtended.innerHTML = formatStructuredFeedback(reflection.feedback_extended, analysisResult);
+                }
+                
+                if (reflection.feedback_short && feedbackShort) {
+                    const analysisResult = reflection.analysis_percentages ? {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    } : null;
+                    feedbackShort.innerHTML = formatStructuredFeedback(reflection.feedback_short, analysisResult);
+                }
+                
+                // Show feedback tabs and buttons
+                if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+                if (reviseBtn) reviseBtn.style.display = 'inline-block';
+                if (submitBtn) submitBtn.style.display = 'block';
+                
+                // Display analysis distribution if available
+                if (reflection.analysis_percentages) {
+                    const analysisResult = {
+                        percentages_raw: reflection.analysis_percentages.raw || reflection.analysis_percentages,
+                        percentages_priority: reflection.analysis_percentages.priority || reflection.analysis_percentages,
+                        weakest_component: reflection.weakest_component || 'Prediction'
+                    };
+                    displayAnalysisDistributionForVideo(analysisResult, videoNum);
+                }
+                
+                // Update task state
+                currentTaskState = {
+                    feedbackGenerated: true,
+                    submitted: reflection.revision_number > 1,
+                    currentReflectionId: reflection.id,
+                    parentReflectionId: reflection.parent_reflection_id,
+                    revisionCount: reflection.revision_number || 1,
+                    currentFeedbackType: null,
+                    currentFeedbackStartTime: null
+                };
+                
+                // Store reflection for duplicate detection
+                sessionStorage.setItem(`reflection-${videoId}`, reflection.reflection_text);
+            } else {
+                // No feedback yet, reset state
+                resetTaskStateForVideo(videoNum);
+            }
+        } else {
+            // No previous reflection, start fresh
+            resetTaskStateForVideo(videoNum);
+        }
+    } catch (error) {
+        console.error('Error in loadPreviousReflectionAndFeedbackForVideo:', error);
+        resetTaskStateForVideo(videoNum);
+    }
+}
+
+// Load previous reflection and feedback for a video (legacy function - kept for compatibility)
 async function loadPreviousReflectionAndFeedback(videoId) {
     if (!supabase || !currentParticipant) {
         // No database, start fresh
@@ -918,8 +1268,8 @@ async function loadPreviousReflectionAndFeedback(videoId) {
     }
 }
 
-// Reset task state (for new video or when no previous work exists)
-function resetTaskState() {
+// Reset task state for a specific video page
+function resetTaskStateForVideo(videoNum) {
     // Reset task state
     currentTaskState = {
         feedbackGenerated: false,
@@ -931,25 +1281,41 @@ function resetTaskState() {
         currentFeedbackStartTime: null
     };
     
+    const ids = getVideoElementIds(videoNum);
+    
     // Clear reflection text
-    const reflectionText = document.getElementById('task-reflection-text');
+    const reflectionText = document.getElementById(ids.reflectionText);
     if (reflectionText) reflectionText.value = '';
-    updateWordCount();
+    updateWordCountForVideo(videoNum);
     
     // Clear all feedback displays
-    const feedbackExtended = document.getElementById('task-feedback-extended');
-    const feedbackShort = document.getElementById('task-feedback-short');
-    const feedbackTabs = document.getElementById('task-feedback-tabs');
-    const analysisDist = document.getElementById('analysis-distribution-task');
-    const reviseBtn = document.getElementById('task-revise-btn');
-    const submitBtn = document.getElementById('task-submit-final');
+    const feedbackExtended = document.getElementById(ids.feedbackExtended);
+    const feedbackShort = document.getElementById(ids.feedbackShort);
+    const feedbackTabs = document.getElementById(ids.feedbackTabs);
+    const reviseBtn = document.getElementById(ids.reviseBtn);
+    const submitBtn = document.getElementById(ids.submitBtn);
     
     if (feedbackExtended) feedbackExtended.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
     if (feedbackShort) feedbackShort.innerHTML = '<p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>';
     if (feedbackTabs) feedbackTabs.classList.add('d-none');
-    if (analysisDist) analysisDist.remove(); // Remove analysis distribution if exists
+    
+    // Remove analysis distribution if exists
+    const analysisDist = document.getElementById(`analysis-distribution-video-${videoNum}`);
+    if (analysisDist) analysisDist.remove();
+    
     if (reviseBtn) reviseBtn.style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
+}
+
+// Reset task state (legacy function - kept for compatibility)
+function resetTaskState() {
+    // This is a fallback - try to detect current video page
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        resetTaskStateForVideo(videoNum);
+    }
 }
 
 // Update progress bar
@@ -1115,17 +1481,30 @@ async function markPostSurveyComplete() {
     }
 }
 
-// Word count
-function updateWordCount() {
-    const text = document.getElementById('task-reflection-text')?.value.trim() || '';
+// Word count for specific video page
+function updateWordCountForVideo(videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const text = document.getElementById(ids.reflectionText)?.value.trim() || '';
     const words = text ? text.split(/\s+/).length : 0;
-    const wordCountEl = document.getElementById('task-word-count');
+    const wordCountEl = document.getElementById(ids.wordCount);
     if (wordCountEl) wordCountEl.textContent = words;
 }
 
-// Generate feedback handler
-async function handleGenerateFeedback() {
-    const reflection = document.getElementById('task-reflection-text')?.value.trim();
+// Word count (legacy - kept for compatibility)
+function updateWordCount() {
+    // Try to detect current video page
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        updateWordCountForVideo(videoNum);
+    }
+}
+
+// Generate feedback handler for specific video
+async function handleGenerateFeedbackForVideo(videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const reflection = document.getElementById(ids.reflectionText)?.value.trim();
     
     if (!reflection) {
         showAlert('Please enter a reflection text first.', 'warning');
@@ -1139,10 +1518,21 @@ async function handleGenerateFeedback() {
         
         document.getElementById('feedback-preference-modal').addEventListener('hidden.bs.modal', function handler() {
             this.removeEventListener('hidden.bs.modal', handler);
-            generateFeedback(reflection);
+            generateFeedbackForVideo(reflection, videoNum);
         });
     } else {
-        generateFeedback(reflection);
+        generateFeedbackForVideo(reflection, videoNum);
+    }
+}
+
+// Generate feedback handler (legacy - kept for compatibility)
+async function handleGenerateFeedback() {
+    // Try to detect current video page
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        handleGenerateFeedbackForVideo(videoNum);
     }
 }
 
@@ -1437,35 +1827,21 @@ function handleRevise() {
 }
 
 function handleFinalSubmission() {
-    if (!currentTaskState.feedbackGenerated) {
-        showAlert('Please generate feedback before submitting.', 'warning');
-        return;
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        handleFinalSubmissionForVideo(videoNum);
     }
-    
-    const modal = new bootstrap.Modal(document.getElementById('final-submission-modal'));
-    modal.show();
 }
 
 function confirmFinalSubmission() {
-    currentTaskState.submitted = true;
-    
-    // Mark video as completed
-    markVideoCompleted();
-    
-    logEvent('final_submission', {
-        video_id: currentVideoId,
-        participant_name: currentParticipant,
-        total_revisions: currentTaskState.revisionCount || 1
-    });
-    
-    showAlert('✅ Final reflection submitted successfully!', 'success');
-    
-    // Show post-video survey
-    setTimeout(() => {
-        const videoNum = VIDEOS.findIndex(v => v.id === currentVideoId) + 1;
-        showPage('post-video-survey');
-        loadSurvey(`post_video_${videoNum}`);
-    }, 1500);
+    const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
+    if (currentVideoPage) {
+        const videoId = currentVideoPage.dataset.videoId;
+        const videoNum = getVideoPageNumber(videoId);
+        confirmFinalSubmissionForVideo(videoNum);
+    }
 }
 
 // Mark video as completed
@@ -1505,14 +1881,41 @@ async function markVideoCompleted() {
 function switchLanguage(lang) {
     currentLanguage = lang;
     renderLanguageSwitchers();
+    renderLanguageSwitcherInNav();
     applyTranslations();
     
     // Update all language radio buttons
-    document.querySelectorAll('input[type="radio"][name^="task-language"]').forEach(radio => {
+    document.querySelectorAll('input[type="radio"][name^="video-"]').forEach(radio => {
         if (radio.id.includes(`lang-${lang}`)) {
             radio.checked = true;
         }
     });
+    
+    // Re-render dashboard if on dashboard page (to update video cards with new language)
+    if (currentPage === 'dashboard' && currentParticipantProgress) {
+        renderDashboard();
+    }
+    
+    // Update video page titles/subtitles if on a video page
+    if (currentPage.startsWith('video-')) {
+        const videoNum = parseInt(currentPage.replace('video-', ''));
+        const videoId = `video${videoNum}`;
+        const video = VIDEOS.find(v => v.id === videoId);
+        if (video) {
+            const ids = getVideoElementIds(videoNum);
+            const titleEl = document.getElementById(ids.title);
+            const subtitleEl = document.getElementById(ids.subtitle);
+            if (titleEl) {
+                const titleText = currentLanguage === 'en' 
+                    ? `Video ${videoNum} Task: ${video.name}`
+                    : `Video ${videoNum} Aufgabe: ${video.name}`;
+                titleEl.textContent = titleText;
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
+            }
+        }
+    }
     
     // Log language change with participant info
     logEvent('language_change', {
@@ -1551,17 +1954,18 @@ function applyTranslations() {
             if (element.hasAttribute('data-lang-key-placeholder')) {
                 element.placeholder = t[key];
             } else {
-                element.textContent = t[key];
+                // For buttons with spans inside, update the span
+                if (element.tagName === 'BUTTON' && element.querySelector('span[data-lang-key]')) {
+                    const span = element.querySelector('span[data-lang-key]');
+                    if (span) span.textContent = t[key];
+                } else if (element.tagName === 'SPAN' && element.hasAttribute('data-lang-key')) {
+                    // Update span elements directly
+                    element.textContent = t[key];
+                } else {
+                    // Update text content directly
+                    element.textContent = t[key];
+                }
             }
-        }
-    });
-    
-    // Update elements with inner HTML (like buttons with icons)
-    document.querySelectorAll('[data-lang-key]').forEach(element => {
-        const key = element.getAttribute('data-lang-key');
-        if (t[key] && element.tagName === 'BUTTON' && element.querySelector('span[data-lang-key]')) {
-            const span = element.querySelector('span[data-lang-key]');
-            if (span) span.textContent = t[key];
         }
     });
     

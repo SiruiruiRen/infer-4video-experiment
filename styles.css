@@ -104,12 +104,14 @@ body {
 }
 
 /* Header Styling - Full Width */
+/* Header Styling - Matching Pilot Study */
 .header-full-width {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 2rem 0;
-  margin-bottom: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 0 15px 15px;
+  box-shadow: var(--card-shadow);
   animation: slideDown 0.5s ease-out;
   position: relative;
   overflow: hidden;
@@ -117,7 +119,8 @@ body {
 }
 
 .header-full-width .main-container {
-  padding: 0 2rem;
+  padding: 0;
+  max-width: 100%;
 }
 
 /* Legacy header support */
@@ -141,15 +144,15 @@ body {
   height: auto;
 }
 
-.header-full-width .row,
-.header .row {
-  min-height: 120px;
+.header-full-width .row {
+  min-height: 80px;
 }
 
 .header-full-width .col-md-4 img,
 .header .col-md-4 img {
   max-width: 100%;
   height: auto;
+  max-height: 50px;
 }
 
 /* Mobile responsive adjustments */
@@ -194,21 +197,20 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 
-.header-full-width h1,
-.header h1 {
+.header-full-width h1 {
   font-weight: 600;
   letter-spacing: 0.5px;
   margin-bottom: 0.2rem;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-  font-size: 2.5rem;
+  font-size: 2rem;
   line-height: 1.2;
 }
 
-.header-full-width p,
-.header p {
-  font-size: 1.1rem;
+.header-full-width p {
+  font-size: 1rem;
   line-height: 1.3;
   margin-bottom: 0;
+  opacity: 0.95;
 }
 
 /* Modern Tab Styling */
