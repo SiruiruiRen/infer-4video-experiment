@@ -604,10 +604,18 @@ function renderDashboard() {
         return;
     }
     
-    // Update participant name
+    // Update welcome message with participant name
+    const welcomeText = document.getElementById('dashboard-welcome-text');
     const nameEl = document.getElementById('dashboard-participant-name');
-    if (nameEl) {
-        nameEl.textContent = currentParticipant || '';
+    if (welcomeText && nameEl) {
+        if (currentParticipant) {
+            welcomeText.textContent = currentLanguage === 'en' ? 'Welcome back,' : 'Willkommen zurück,';
+            nameEl.textContent = currentParticipant;
+            nameEl.style.fontWeight = '600';
+        } else {
+            welcomeText.textContent = currentLanguage === 'en' ? 'Welcome' : 'Willkommen';
+            nameEl.textContent = '';
+        }
     }
     
     // Update progress bar
@@ -767,6 +775,24 @@ function startVideoTask(videoId) {
     const reflectionText = document.getElementById('task-reflection-text');
     if (reflectionText) reflectionText.value = '';
     updateWordCount();
+    
+    // Clear all feedback displays
+    const feedbackExtended = document.getElementById('task-feedback-extended');
+    const feedbackShort = document.getElementById('task-feedback-short');
+    const feedbackTabs = document.getElementById('task-feedback-tabs');
+    const analysisDist = document.getElementById('analysis-distribution-task');
+    const reviseBtn = document.getElementById('task-revise-btn');
+    const submitBtn = document.getElementById('task-submit-final');
+    
+    if (feedbackExtended) feedbackExtended.innerHTML = '';
+    if (feedbackShort) feedbackShort.innerHTML = '';
+    if (feedbackTabs) feedbackTabs.classList.add('d-none');
+    if (analysisDist) analysisDist.remove(); // Remove analysis distribution if exists
+    if (reviseBtn) reviseBtn.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+    
+    // Clear any stored reflection for this video
+    sessionStorage.removeItem(`reflection-${videoId}`);
     
     // Show percentage explanation
     const explanationEl = document.getElementById('percentage-explanation');

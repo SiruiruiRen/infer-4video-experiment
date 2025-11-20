@@ -35,6 +35,63 @@ body {
   padding: 0 20px;
 }
 
+/* Dashboard specific spacing */
+#page-dashboard .main-container {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+#page-dashboard .card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+  background: white;
+}
+
+#page-dashboard .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+#page-dashboard .card-body {
+  padding: 1.5rem;
+}
+
+#page-dashboard .card h5,
+#page-dashboard .card h6 {
+  color: var(--primary-dark);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+#page-dashboard .card .badge {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+}
+
+#page-dashboard #dashboard-presurvey-card,
+#page-dashboard #dashboard-postsurvey-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-left: 4px solid var(--primary-color);
+}
+
+#page-dashboard .video-card {
+  transition: all 0.3s ease;
+}
+
+#page-dashboard .video-card.completed {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border-left: 4px solid var(--success-color);
+}
+
+#page-dashboard .video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
 /* Adjust row to use full width */
 .row {
   margin-left: -10px;
@@ -50,8 +107,8 @@ body {
 .header-full-width {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 1.5rem 0;
-  margin-bottom: 2rem;
+  padding: 2rem 0;
+  margin-bottom: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: slideDown 0.5s ease-out;
   position: relative;
@@ -2002,14 +2059,15 @@ textarea {
     display: flex !important;
     justify-content: center;
     align-items: center;
-    padding: 12px 0;
-    background-color: rgba(248, 249, 250, 0.95);
+    padding: 14px 0;
+    background-color: rgba(255, 255, 255, 0.98);
     border-bottom: 1px solid #e9ecef;
     position: sticky;
     top: 0;
     z-index: 1000;
     backdrop-filter: blur(10px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    margin-bottom: 0;
 }
 
 .language-switcher-container .btn-group {
