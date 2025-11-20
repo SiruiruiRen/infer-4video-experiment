@@ -432,6 +432,13 @@ function showPage(pageId) {
             updateProgressBar();
         }
         
+        // Render dashboard if showing dashboard page
+        if (pageId === 'dashboard' && currentParticipantProgress) {
+            setTimeout(() => {
+                renderDashboard();
+            }, 100);
+        }
+        
         // Apply translations for new page
         applyTranslations();
         
@@ -571,20 +578,36 @@ async function createParticipantProgress(participantName, condition) {
 
 // Render dashboard
 function renderDashboard() {
-    if (!currentParticipantProgress) return;
+    console.log('renderDashboard called', { currentParticipantProgress, currentParticipant });
+    
+    if (!currentParticipantProgress) {
+        console.warn('No participant progress available');
+        return;
+    }
     
     // Update participant name
     const nameEl = document.getElementById('dashboard-participant-name');
-    if (nameEl) nameEl.textContent = currentParticipant;
+    if (nameEl) {
+        nameEl.textContent = currentParticipant || '';
+    }
     
     // Update progress bar
     updateProgressBar();
     
     // Render video cards
     const container = document.getElementById('video-cards-container');
-    if (!container) return;
+    if (!container) {
+        console.error('video-cards-container not found');
+        return;
+    }
     
     container.innerHTML = '';
+    
+    if (!VIDEOS || VIDEOS.length === 0) {
+        console.error('VIDEOS array is empty or undefined');
+        container.innerHTML = '<div class="col-12"><div class="alert alert-warning">No videos configured. Please check VIDEOS array in app.js</div></div>';
+        return;
+    }
     
     VIDEOS.forEach((video, index) => {
         const isCompleted = currentParticipantProgress.videos_completed?.includes(video.id) || false;
@@ -598,6 +621,8 @@ function renderDashboard() {
     if (postSurveySection) {
         postSurveySection.classList.toggle('d-none', videosDone < 4 || currentParticipantProgress.post_survey_completed);
     }
+    
+    console.log('Dashboard rendered successfully');
 }
 
 // Create video card
