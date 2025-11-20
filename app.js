@@ -1124,11 +1124,9 @@ function renderLanguageSwitchers() {
     const containers = document.querySelectorAll('.language-switcher-container');
     containers.forEach(container => {
         container.innerHTML = `
-            <div class="d-flex justify-content-end">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-en">English</button>
-                    <button type="button" class="btn ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-de">Deutsch</button>
-                </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-en">English</button>
+                <button type="button" class="btn ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-de">Deutsch</button>
             </div>
         `;
     });
