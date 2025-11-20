@@ -148,3 +148,4 @@ Once configured and deployed:
 
 Fütterer, T., Nguyen, H., Ren, S., & Stürmer, K. (2025). INFER - An intelligent feedback system for classroom observation [Computer software]. University of Tübingen & University of North Carolina, Chapel Hill.
 
+

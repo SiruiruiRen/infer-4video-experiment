@@ -221,6 +221,10 @@ const translations = {
         final_step: "Letzter Schritt:",
         final_survey_instructions: "Vervollständigen Sie die Umfrage oben und klicken Sie dann unten auf \"Studie abschließen\", um fertig zu werden.",
         complete_study: "Studie abschließen",
+        pre_survey_completed: "Vor-Umfrage abgeschlossen",
+        pre_survey_completed_message: "Sie haben die Vor-Umfrage bereits abgeschlossen. Sie können sie unten überprüfen oder zum Dashboard fortfahren.",
+        view_pre_survey: "Ansehen",
+        video_tasks: "Video-Aufgaben",
         thank_you_title: "Vielen Dank!",
         participation_complete: "Ihre Teilnahme ist abgeschlossen",
         study_complete: "Studie abgeschlossen!",
@@ -300,7 +304,12 @@ function setupEventListeners() {
         showPage('dashboard');
     });
     
-    // Dashboard
+    // Dashboard navigation
+    document.getElementById('go-to-presurvey-btn')?.addEventListener('click', () => {
+        showPage('presurvey');
+        loadSurvey('pre');
+    });
+    
     document.getElementById('start-post-survey')?.addEventListener('click', () => {
         showPage('postsurvey');
         loadSurvey('post');
@@ -481,19 +490,19 @@ async function handleLogin() {
             resumeInfo.classList.remove('d-none');
         }
         
-        // If pre-survey not done, show it
-        if (!progress.pre_survey_completed) {
-            setTimeout(() => {
-                showPage('presurvey');
-                loadSurvey('pre');
-            }, 1500);
-        } else {
-            // Go to dashboard
-            setTimeout(() => {
-                showPage('dashboard');
-                renderDashboard();
-            }, 1500);
-        }
+        // Always show dashboard first, then optionally show pre-survey if not done
+        setTimeout(() => {
+            showPage('dashboard');
+            renderDashboard();
+            
+            // If pre-survey not done, show it after a brief delay
+            if (!progress.pre_survey_completed) {
+                setTimeout(() => {
+                    showPage('presurvey');
+                    loadSurvey('pre');
+                }, 2000);
+            }
+        }, 1500);
     } else {
         // New participant
         currentParticipant = participantCode;
@@ -515,10 +524,16 @@ async function handleLogin() {
             assigned_condition: condition
         });
         
-        // Show pre-survey
+        // Show dashboard first, then pre-survey
         setTimeout(() => {
-            showPage('presurvey');
-            loadSurvey('pre');
+            showPage('dashboard');
+            renderDashboard();
+            
+            // Show pre-survey after dashboard loads
+            setTimeout(() => {
+                showPage('presurvey');
+                loadSurvey('pre');
+            }, 2000);
         }, 1500);
     }
 }
@@ -594,6 +609,9 @@ function renderDashboard() {
     // Update progress bar
     updateProgressBar();
     
+    // Update pre-survey status
+    updatePreSurveyStatus();
+    
     // Render video cards
     const container = document.getElementById('video-cards-container');
     if (!container) {
@@ -611,33 +629,91 @@ function renderDashboard() {
     
     VIDEOS.forEach((video, index) => {
         const isCompleted = currentParticipantProgress.videos_completed?.includes(video.id) || false;
-        const card = createVideoCard(video, index + 1, isCompleted);
+        const videoSurveyCompleted = currentParticipantProgress.video_surveys?.[video.id] || false;
+        const card = createVideoCard(video, index + 1, isCompleted, videoSurveyCompleted);
         container.appendChild(card);
     });
     
-    // Show post-survey button if all videos complete
-    const videosDone = currentParticipantProgress.videos_completed?.length || 0;
-    const postSurveySection = document.getElementById('post-survey-section');
-    if (postSurveySection) {
-        postSurveySection.classList.toggle('d-none', videosDone < 4 || currentParticipantProgress.post_survey_completed);
-    }
+    // Update post-survey status
+    updatePostSurveyStatus();
     
     console.log('Dashboard rendered successfully');
 }
 
+// Update pre-survey status on dashboard
+function updatePreSurveyStatus() {
+    const isCompleted = currentParticipantProgress?.pre_survey_completed || false;
+    const badge = document.getElementById('presurvey-status-badge');
+    const viewBtn = document.getElementById('go-to-presurvey-btn');
+    
+    if (badge) {
+        if (isCompleted) {
+            badge.className = 'badge bg-success';
+            badge.textContent = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
+        } else {
+            badge.className = 'badge bg-warning';
+            badge.textContent = currentLanguage === 'en' ? 'Not Started' : 'Nicht gestartet';
+        }
+    }
+    
+    if (viewBtn) {
+        viewBtn.textContent = isCompleted 
+            ? (currentLanguage === 'en' ? 'Review' : 'Ansehen')
+            : (currentLanguage === 'en' ? 'Start' : 'Starten');
+    }
+}
+
+// Update post-survey status on dashboard
+function updatePostSurveyStatus() {
+    const videosDone = currentParticipantProgress?.videos_completed?.length || 0;
+    const allVideosDone = videosDone >= 4;
+    const isCompleted = currentParticipantProgress?.post_survey_completed || false;
+    
+    const badge = document.getElementById('postsurvey-status-badge');
+    const startBtn = document.getElementById('start-post-survey');
+    
+    if (badge) {
+        if (isCompleted) {
+            badge.className = 'badge bg-success';
+            badge.textContent = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
+        } else if (allVideosDone) {
+            badge.className = 'badge bg-primary';
+            badge.textContent = currentLanguage === 'en' ? 'Available' : 'Verfügbar';
+        } else {
+            badge.className = 'badge bg-secondary';
+            badge.textContent = currentLanguage === 'en' ? 'Not Available' : 'Nicht verfügbar';
+        }
+    }
+    
+    if (startBtn) {
+        if (allVideosDone && !isCompleted) {
+            startBtn.classList.remove('d-none');
+        } else {
+            startBtn.classList.add('d-none');
+        }
+    }
+}
+
 // Create video card
-function createVideoCard(video, number, isCompleted) {
+function createVideoCard(video, number, isCompleted, surveyCompleted) {
     const card = document.createElement('div');
     card.className = 'col-md-6 col-lg-3';
+    
+    const completedText = currentLanguage === 'en' ? 'Completed' : 'Abgeschlossen';
+    const startText = currentLanguage === 'en' ? 'Start Video' : 'Video starten';
+    const surveyText = currentLanguage === 'en' ? 'Survey Done' : 'Umfrage erledigt';
     
     card.innerHTML = `
         <div class="card h-100 video-card ${isCompleted ? 'completed' : ''}" data-video-id="${video.id}">
             <div class="card-body text-center">
                 <h5>Video ${number}</h5>
-                <p class="text-muted">${video.name}</p>
+                <p class="text-muted small">${video.name}</p>
                 ${isCompleted 
-                    ? '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Completed</span>'
-                    : '<button class="btn btn-primary start-video-btn" data-video-id="' + video.id + '">Start Video</button>'
+                    ? `<div>
+                        <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> ${completedText}</span>
+                        ${surveyCompleted ? `<div><small class="text-muted"><i class="bi bi-clipboard-check"></i> ${surveyText}</small></div>` : ''}
+                       </div>`
+                    : `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${startText}</button>`
                 }
             </div>
         </div>
@@ -744,6 +820,44 @@ function loadSurvey(surveyType) {
     }
 }
 
+// Update pre-survey page based on completion status
+function updatePreSurveyPage() {
+    const isCompleted = currentParticipantProgress?.pre_survey_completed || false;
+    const completedStatus = document.getElementById('presurvey-completed-status');
+    const description = document.getElementById('presurvey-description');
+    const instructions = document.getElementById('presurvey-instructions');
+    const continueBtn = document.getElementById('continue-after-presurvey');
+    
+    if (isCompleted) {
+        // Show completion status
+        if (completedStatus) {
+            completedStatus.classList.remove('d-none');
+        }
+        if (description) {
+            description.textContent = currentLanguage === 'en' 
+                ? 'You have already completed this survey. You can review it below or return to the dashboard.'
+                : 'Sie haben diese Umfrage bereits abgeschlossen. Sie können sie unten überprüfen oder zum Dashboard zurückkehren.';
+        }
+        if (instructions) {
+            instructions.innerHTML = currentLanguage === 'en'
+                ? '<small><i class="bi bi-info-circle me-1"></i><strong>Status:</strong> <span>Pre-survey completed. You can review it above or return to the dashboard.</span></small>'
+                : '<small><i class="bi bi-info-circle me-1"></i><strong>Status:</strong> <span>Vor-Umfrage abgeschlossen. Sie können sie oben überprüfen oder zum Dashboard zurückkehren.</span></small>';
+            instructions.className = 'alert alert-info mt-3 mb-0';
+        }
+        if (continueBtn) {
+            continueBtn.textContent = currentLanguage === 'en' ? 'Return to Dashboard' : 'Zum Dashboard zurückkehren';
+        }
+    } else {
+        // Hide completion status
+        if (completedStatus) {
+            completedStatus.classList.add('d-none');
+        }
+        if (instructions) {
+            instructions.className = 'alert alert-success mt-3 mb-0';
+        }
+    }
+}
+
 // Mark pre-survey complete
 async function markPreSurveyComplete() {
     if (!supabase || !currentParticipant) return;
@@ -760,6 +874,7 @@ async function markPreSurveyComplete() {
         if (error) console.error('Error marking pre-survey complete:', error);
         else {
             currentParticipantProgress.pre_survey_completed = true;
+            updatePreSurveyStatus(); // Update dashboard status
             logEvent('pre_survey_completed', { 
                 participant_name: currentParticipant,
                 language: currentLanguage

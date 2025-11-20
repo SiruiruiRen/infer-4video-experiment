@@ -52,3 +52,4 @@ When we did `git init` inside `infer-4video-version` folder, that folder BECAME 
 
 So Publish Directory should be `.` (root), not `infer-4video-version`.
 
+

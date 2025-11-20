@@ -94,11 +94,17 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-body">
+                            <!-- Pre-survey completion status -->
+                            <div id="presurvey-completed-status" class="alert alert-success mb-4 d-none">
+                                <h6><i class="bi bi-check-circle-fill me-2"></i><span data-lang-key="pre_survey_completed">Pre-Survey Completed</span></h6>
+                                <p class="mb-0" data-lang-key="pre_survey_completed_message">You have already completed the pre-survey. You can review it below or continue to the dashboard.</p>
+                            </div>
+                            
                             <div class="qualtrics-survey-section border rounded p-4 mb-4">
                                 <div class="row">
                                     <div class="col-12">
                                         <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i><span data-lang-key="pre_survey_title">Pre-Survey</span></h6>
-                                        <p class="text-muted mb-3" data-lang-key="pre_survey_description">Please complete the survey below. This takes about 5-10 minutes.</p>
+                                        <p class="text-muted mb-3" id="presurvey-description" data-lang-key="pre_survey_description">Please complete the survey below. This takes about 5-10 minutes.</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -108,7 +114,7 @@
                                         </div>
                             </div>
                                 </div>
-                                <div class="alert alert-success mt-3 mb-0">
+                                <div id="presurvey-instructions" class="alert alert-success mt-3 mb-0">
                                     <small><i class="bi bi-check-circle me-1"></i><strong data-lang-key="next_step">Next Step:</strong> 
                                     <span data-lang-key="pre_survey_instructions">Complete the survey above, then click "Continue to Dashboard" below.</span></small>
                                 </div>
@@ -145,7 +151,7 @@
             
             <div class="row justify-content-center mt-4">
                 <div class="col-md-10">
-                    <!-- Progress Summary -->
+                    <!-- Overall Progress Summary -->
                     <div class="card mb-4">
                         <div class="card-body text-center">
                             <h5 data-lang-key="your_progress">Your Progress</h5>
@@ -158,17 +164,45 @@
                         </div>
                     </div>
                     
-                    <!-- Video Cards Grid -->
-                    <div class="row g-4" id="video-cards-container">
-                        <!-- Video cards will be dynamically generated -->
+                    <!-- Pre-Survey Status Card -->
+                    <div class="card mb-4" id="dashboard-presurvey-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="bi bi-chat-square-text me-2"></i><span data-lang-key="pre_survey_title">Pre-Survey</span></h6>
+                                    <p class="text-muted mb-0 small" data-lang-key="pre_survey_description">Complete before starting videos</p>
+                                </div>
+                                <div>
+                                    <span id="presurvey-status-badge" class="badge bg-secondary">Not Started</span>
+                                    <button id="go-to-presurvey-btn" class="btn btn-sm btn-outline-primary ms-2" data-lang-key="view_pre_survey">View</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- Post-Survey Button (shown when all videos complete) -->
-                    <div id="post-survey-section" class="card mt-4 d-none">
-                        <div class="card-body text-center">
-                            <h5 class="text-success"><i class="bi bi-check-circle-fill me-2"></i><span data-lang-key="all_videos_completed">All Videos Completed!</span></h5>
-                            <p data-lang-key="final_survey_prompt">Please complete the final post-survey to finish the experiment.</p>
-                            <button id="start-post-survey" class="btn btn-success btn-lg" data-lang-key="start_post_survey">Start Post-Survey</button>
+                    <!-- Video Cards Grid -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="mb-3"><i class="bi bi-play-circle me-2"></i><span data-lang-key="video_tasks">Video Tasks</span></h6>
+                            <div class="row g-4" id="video-cards-container">
+                                <!-- Video cards will be dynamically generated -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Post-Survey Status Card -->
+                    <div class="card mb-4" id="dashboard-postsurvey-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="bi bi-clipboard-check me-2"></i><span data-lang-key="final_post_survey_title">Final Post-Survey</span></h6>
+                                    <p class="text-muted mb-0 small" data-lang-key="final_post_survey_description">Complete after all videos are done</p>
+                                </div>
+                                <div>
+                                    <span id="postsurvey-status-badge" class="badge bg-secondary">Not Available</span>
+                                    <button id="start-post-survey" class="btn btn-sm btn-success ms-2 d-none" data-lang-key="start_post_survey">Start</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

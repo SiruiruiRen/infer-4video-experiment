@@ -139,3 +139,4 @@ If you encounter issues:
 3. Check database tables exist
 4. Verify RLS policies allow inserts
 
+
