@@ -386,6 +386,8 @@ function handleTabSwitch() {
             tab_switch_count: tabSwitchCount,
             current_page: currentPage,
             video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
             timestamp: new Date().toISOString()
         });
     } else {
@@ -395,6 +397,8 @@ function handleTabSwitch() {
             time_away_seconds: timeAway,
             current_page: currentPage,
             video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
             timestamp: new Date().toISOString()
         });
         
@@ -1196,6 +1200,7 @@ function startFeedbackViewing(style, language) {
         video_id: currentVideoId,
         style: style,
         language: language,
+        participant_name: currentParticipant || null,
         reflection_id: currentTaskState.currentReflectionId
     });
 }
@@ -1208,6 +1213,7 @@ function endFeedbackViewing(style, language) {
         video_id: currentVideoId,
         style: style,
         language: language,
+        participant_name: currentParticipant || null,
         duration_seconds: duration,
         reflection_id: currentTaskState.currentReflectionId
     });
@@ -1895,6 +1901,7 @@ window.addEventListener('beforeunload', () => {
         session_duration: Date.now() - performance.timing.navigationStart,
         language: currentLanguage,
         final_page: currentPage,
-        video_id: currentVideoId
+        video_id: currentVideoId,
+        participant_name: currentParticipant || null
     });
 });
