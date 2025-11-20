@@ -876,23 +876,75 @@ async function generateFeedback(reflection) {
     }, 8000);
     
     try {
-        // Step 1: Analyze reflection
+        // Step 0: Check for duplicate reflection
+        const previousReflection = sessionStorage.getItem(`reflection-${currentVideoId}`);
+        if (previousReflection && previousReflection.trim() === reflection.trim()) {
+            const duplicateMessage = currentLanguage === 'en'
+                ? "⚠️ You submitted the same reflection as before. Please revise your reflection to improve it based on the previous feedback, then generate new feedback."
+                : "⚠️ Sie haben dieselbe Reflexion wie zuvor eingereicht. Bitte überarbeiten Sie Ihre Reflexion, um sie basierend auf dem vorherigen Feedback zu verbessern, und generieren Sie dann neues Feedback.";
+            
+            logEvent('duplicate_reflection_detected', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                reflection_length: reflection.length,
+                revision_count: currentTaskState.revisionCount || 0
+            });
+            
+            clearInterval(loadingInterval);
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (generateBtn) generateBtn.disabled = false;
+            
+            showAlert(duplicateMessage, 'warning');
+            return;
+        }
+        
+        // Step 0.5: Check for very short or non-relevant reflection
+        const wordCount = reflection.split(/\s+/).length;
+        const isVeryShort = wordCount < 20;
+        
+        // Step 1: Analyze reflection (binary classification at window level, then aggregated)
         const analysisResult = await analyzeReflectionDistribution(reflection, currentLanguage);
         
-        // Store binary classification results
+        // Store binary classification results (window-level D/E/P scores)
         await storeBinaryClassificationResults(analysisResult);
         
-        // Step 2: Check for non-meaningful input
-        if (analysisResult.percentages_priority.professional_vision < 10) {
+        // Step 2: Check for non-meaningful input (short OR non-relevant)
+        const isNonRelevant = analysisResult.percentages_priority.professional_vision < 10;
+        
+        if (isVeryShort || isNonRelevant) {
             displayAnalysisDistribution(analysisResult);
-            const simpleMessage = currentLanguage === 'en'
-                ? "Please write a reflection that relates to the teaching video you watched. Focus on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
-                : "Bitte schreiben Sie eine Reflexion, die sich auf das Unterrichtsvideo bezieht, das Sie sich angeschaut haben. Konzentrieren Sie sich darauf zu beschreiben, was Sie beobachtet haben, zu erklären, warum es passiert ist (unter Verwendung pädagogischer Theorien), und die Auswirkungen auf das Lernen der Schüler vorherzusagen.";
+            
+            let warningMessage = '';
+            if (isVeryShort && isNonRelevant) {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection is very short and does not relate to the teaching video. Please write a longer reflection (at least 50 words) that describes what you observed, explains why it happened using educational theories, and predicts the effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz und bezieht sich nicht auf das Unterrichtsvideo. Bitte schreiben Sie eine längere Reflexion (mindestens 50 Wörter), die beschreibt, was Sie beobachtet haben, erklärt, warum es passiert ist (unter Verwendung pädagogischer Theorien), und die Auswirkungen auf das Lernen der Schüler vorhersagt.";
+            } else if (isVeryShort) {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection is very short (only " + wordCount + " words). Please expand your reflection to at least 50 words, providing more detail about what you observed, why it happened, and its effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz (nur " + wordCount + " Wörter). Bitte erweitern Sie Ihre Reflexion auf mindestens 50 Wörter und geben Sie mehr Details zu dem, was Sie beobachtet haben, warum es passiert ist und welche Auswirkungen es auf das Lernen der Schüler hat.";
+            } else {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection does not relate to the teaching video you watched. Please revise your reflection to focus on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                    : "⚠️ Ihre Reflexion bezieht sich nicht auf das Unterrichtsvideo, das Sie sich angeschaut haben. Bitte überarbeiten Sie Ihre Reflexion, um sich auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
+            }
+            
+            logEvent('non_relevant_reflection_detected', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                reflection_length: reflection.length,
+                word_count: wordCount,
+                professional_vision_percentage: analysisResult.percentages_priority.professional_vision,
+                is_very_short: isVeryShort,
+                is_non_relevant: isNonRelevant
+            });
             
             const feedbackExtended = document.getElementById('task-feedback-extended');
             const feedbackShort = document.getElementById('task-feedback-short');
-            if (feedbackExtended) feedbackExtended.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${simpleMessage}</div>`;
-            if (feedbackShort) feedbackShort.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${simpleMessage}</div>`;
+            if (feedbackExtended) feedbackExtended.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${warningMessage}</div>`;
+            if (feedbackShort) feedbackShort.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${warningMessage}</div>`;
             
             const feedbackTabs = document.getElementById('task-feedback-tabs');
             if (feedbackTabs) feedbackTabs.classList.remove('d-none');
@@ -912,13 +964,34 @@ async function generateFeedback(reflection) {
             generateWeightedFeedback(reflection, currentLanguage, 'user-friendly', analysisResult)
         ]);
         
-        // Step 5: Add revision suggestion if needed
+        // Step 5: Add revision suggestion if needed (for non-relevant content)
         let finalShortFeedback = shortFeedback;
+        let finalExtendedFeedback = extendedFeedback;
+        
+        // Add warning if significant non-relevant content
         if (analysisResult && analysisResult.percentages_priority.other > 50) {
             const revisionNote = currentLanguage === 'en' 
-                ? "\n\n**Important Note:** Your reflection contains a significant amount of content that doesn't follow professional lesson analysis steps. Please revise your reflection to focus more on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
-                : "\n\n**Wichtiger Hinweis:** Ihre Reflexion enthält einen erheblichen Anteil an Inhalten, die nicht den Schritten einer professionellen Stundenanalyse folgen. Bitte überarbeiten Sie Ihre Reflexion, um sich mehr auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
+                ? "\n\n**⚠️ Important Note:** Your reflection contains a significant amount of content that doesn't follow professional lesson analysis steps. Please revise your reflection to focus more on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                : "\n\n**⚠️ Wichtiger Hinweis:** Ihre Reflexion enthält einen erheblichen Anteil an Inhalten, die nicht den Schritten einer professionellen Stundenanalyse folgen. Bitte überarbeiten Sie Ihre Reflexion, um sich mehr auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
             finalShortFeedback += revisionNote;
+            finalExtendedFeedback += revisionNote;
+            
+            logEvent('non_relevant_content_warning', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                other_percentage: analysisResult.percentages_priority.other,
+                professional_vision_percentage: analysisResult.percentages_priority.professional_vision
+            });
+        }
+        
+        // Add warning if professional vision is low but above threshold
+        if (analysisResult && analysisResult.percentages_priority.professional_vision < 30 && analysisResult.percentages_priority.professional_vision >= 10) {
+            const lowPVNote = currentLanguage === 'en'
+                ? "\n\n**Note:** Your reflection shows limited connection to professional vision concepts. Try to include more descriptions of observable teaching events, explanations linking events to educational theories, and predictions about effects on student learning."
+                : "\n\n**Hinweis:** Ihre Reflexion zeigt eine begrenzte Verbindung zu Professional-Vision-Konzepten. Versuchen Sie, mehr Beschreibungen beobachtbarer Unterrichtsereignisse, Erklärungen, die Ereignisse mit pädagogischen Theorien verknüpfen, und Vorhersagen über Auswirkungen auf das Lernen der Schüler einzubeziehen.";
+            finalShortFeedback += lowPVNote;
+            finalExtendedFeedback += lowPVNote;
         }
         
         // Step 6: Save to database
@@ -927,17 +1000,20 @@ async function generateFeedback(reflection) {
             videoSelected: currentVideoId,
             reflectionText: reflection,
             analysisResult,
-            extendedFeedback,
+            extendedFeedback: finalExtendedFeedback,
             shortFeedback: finalShortFeedback
         });
         
-        // Step 7: Display feedback
+        // Step 7: Store reflection for duplicate detection
+        sessionStorage.setItem(`reflection-${currentVideoId}`, reflection.trim());
+        
+        // Step 8: Display feedback
         const feedbackExtended = document.getElementById('task-feedback-extended');
         const feedbackShort = document.getElementById('task-feedback-short');
-        if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(extendedFeedback, analysisResult);
+        if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(finalExtendedFeedback, analysisResult);
         if (feedbackShort) feedbackShort.innerHTML = formatStructuredFeedback(finalShortFeedback, analysisResult);
         
-        // Step 8: Show tabs
+        // Step 9: Show tabs
         const feedbackTabs = document.getElementById('task-feedback-tabs');
         if (feedbackTabs) feedbackTabs.classList.remove('d-none');
         
@@ -950,13 +1026,25 @@ async function generateFeedback(reflection) {
         // Start feedback viewing tracking
         startFeedbackViewing(userPreferredFeedbackStyle, currentLanguage);
         
-        // Step 9: Show revise and submit buttons
+        // Step 10: Show revise and submit buttons
         const reviseBtn = document.getElementById('task-revise-btn');
         const submitBtn = document.getElementById('task-submit-final');
         if (reviseBtn) reviseBtn.style.display = 'inline-block';
         if (submitBtn) submitBtn.style.display = 'block';
         
         currentTaskState.feedbackGenerated = true;
+        
+        // Log successful feedback generation
+        logEvent('feedback_generated_successfully', {
+            participant_name: currentParticipant,
+            video_id: currentVideoId,
+            language: currentLanguage,
+            reflection_length: reflection.length,
+            word_count: wordCount,
+            professional_vision_percentage: analysisResult.percentages_priority.professional_vision,
+            other_percentage: analysisResult.percentages_priority.other,
+            revision_count: currentTaskState.revisionCount || 0
+        });
         
         showAlert('✅ Feedback generated successfully!', 'success');
         
@@ -1349,12 +1437,18 @@ CRITERIA FOR "1" (Contains Description):
 - Identifies observable teacher or student actions
 - Relates to learning processes, teaching processes, or learning activities
 - Uses neutral, observational language
+- Must be relevant to teaching/learning context
 
 CRITERIA FOR "0" (No Description):
 - Contains evaluations, interpretations, or speculations
 - Not about teaching/learning events
+- Non-relevant content (e.g., personal opinions unrelated to teaching, random text)
+- Too short or meaningless fragments
 
-INSTRUCTIONS: Respond with ONLY "1" or "0"
+INSTRUCTIONS: 
+- Respond with ONLY "1" or "0"
+- Be conservative: only respond "1" if clearly certain the criteria are met
+- If text is non-relevant or too short, respond "0"
 
 TEXT: ${windowText}`;
 
@@ -1371,18 +1465,22 @@ CRITERIA FOR "1" (Contains Explanation):
 - References learning theories, teaching principles, or pedagogical concepts
 - Explains WHY a teaching action was used or effective
 - Examples: "Open questions activate students cognitively", "Rules prevent disruptions"
+- Must be relevant to teaching/learning context
 
 CRITERIA FOR "0" (No Explanation):
 - No connection to educational theories or principles
 - Explains non-observable or hypothetical events
 - No reference to teaching/learning events
 - Pure description without theoretical connection
+- Non-relevant content unrelated to teaching
+- Too short or meaningless fragments
 
 INSTRUCTIONS:
 - Respond with ONLY "1" or "0"
 - No explanations, quotes, or other text
 - "1" if ANY part connects teaching events to educational knowledge
-- "0" if no theoretical connections present
+- "0" if no theoretical connections present OR if content is non-relevant
+- Be conservative: only respond "1" if clearly certain
 
 TEXT: ${windowText}`;
 
@@ -1399,18 +1497,22 @@ CRITERIA FOR "1" (Contains Prediction):
 - Based on educational knowledge about learning
 - Focuses on consequences for students
 - Examples: "This feedback could increase motivation", "Students may feel confused"
+- Must be relevant to teaching/learning context
 
 CRITERIA FOR "0" (No Prediction):
 - No effects on student learning mentioned
 - Predictions without educational basis
 - No connection to teaching events
 - Predictions about non-learning outcomes
+- Non-relevant content unrelated to teaching
+- Too short or meaningless fragments
 
 INSTRUCTIONS:
 - Respond with ONLY "1" or "0"
 - No explanations, quotes, or other text
 - "1" if ANY part predicts effects on student learning
-- "0" if no learning consequences mentioned
+- "0" if no learning consequences mentioned OR if content is non-relevant
+- Be conservative: only respond "1" if clearly certain
 
 TEXT: ${windowText}`;
 
