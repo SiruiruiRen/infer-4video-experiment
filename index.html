@@ -23,6 +23,7 @@
 
     <!-- Page 1: Login/Resume -->
     <div id="page-login" class="page-container">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header">
                 <div class="row align-items-center">
@@ -31,8 +32,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 45px;">
                     </div>
                     <div class="col-md-8 text-center">
-                        <h1 class="mb-0">INFER</h1>
-                        <p class="mb-0" style="font-size: 1.1rem;">4-Video Experiment</p>
+                        <h1 class="mb-0" data-lang-key="title">INFER</h1>
+                        <p class="mb-0" style="font-size: 1.1rem;" data-lang-key="subtitle">Ein intelligentes Feedback-System zur Beobachtung von Unterricht</p>
                     </div>
                 </div>
             </div>
@@ -41,15 +42,15 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header text-center">
-                            <h4>Enter Your Participant Code</h4>
+                            <h4 data-lang-key="login_title">Enter Your Participant Code</h4>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted">Create a code: First letter of mother's first name + birth month (2 digits) + birth year (2 digits).</p>
-                            <p class="text-muted small">Example: Mother named Anna, born in August 1995 → <strong>A0895</strong></p>
+                            <p class="text-muted" data-lang-key="code_help_text">Create a code: First letter of mother's first name + birth month (2 digits) + birth year (2 digits).</p>
+                            <p class="text-muted small" data-lang-key="code_example">Example: Mother named Anna, born in August 1995 → <strong>A0895</strong></p>
                             
                             <div class="mb-3">
-                                <label for="participant-code-input" class="form-label">Participant Code:</label>
-                                <input type="text" class="form-control" id="participant-code-input" placeholder="e.g., A0895" maxlength="20" autofocus>
+                                <label for="participant-code-input" class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
+                                <input type="text" class="form-control" id="participant-code-input" data-lang-key-placeholder="code_placeholder" placeholder="e.g., A0895" maxlength="20" autofocus>
                             </div>
                             
                             <div id="resume-info" class="alert alert-info d-none">
@@ -57,9 +58,9 @@
                                 <span id="resume-message"></span>
                             </div>
                             
-                            <button id="login-button" class="btn btn-primary btn-lg w-100">
+                            <button id="login-button" class="btn btn-primary btn-lg w-100" data-lang-key="continue_button">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>
-                                Continue
+                                <span data-lang-key="continue_button">Continue</span>
                             </button>
                         </div>
                     </div>
@@ -70,6 +71,7 @@
 
     <!-- Page 2: Pre-Survey -->
     <div id="page-presurvey" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -78,8 +80,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0">Pre-Survey</h1>
-                        <p class="mb-0">Please complete the pre-survey before starting</p>
+                        <h1 class="mb-0" data-lang-key="pre_survey_title">Pre-Survey</h1>
+                        <p class="mb-0" data-lang-key="pre_survey_subtitle">Please complete the pre-survey before starting</p>
                             </div>
                         </div>
                     </div>
@@ -91,8 +93,8 @@
                             <div class="qualtrics-survey-section border rounded p-4 mb-4">
                                 <div class="row">
                                     <div class="col-12">
-                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Pre-Survey</h6>
-                                        <p class="text-muted mb-3">Please complete the survey below. This takes about 5-10 minutes.</p>
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i><span data-lang-key="pre_survey_title">Pre-Survey</span></h6>
+                                        <p class="text-muted mb-3" data-lang-key="pre_survey_description">Please complete the survey below. This takes about 5-10 minutes.</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -103,13 +105,13 @@
                             </div>
                                 </div>
                                 <div class="alert alert-success mt-3 mb-0">
-                                    <small><i class="bi bi-check-circle me-1"></i><strong>Next Step:</strong> 
-                                    Complete the survey above, then click "Continue to Dashboard" below.</small>
+                                    <small><i class="bi bi-check-circle me-1"></i><strong data-lang-key="next_step">Next Step:</strong> 
+                                    <span data-lang-key="pre_survey_instructions">Complete the survey above, then click "Continue to Dashboard" below.</span></small>
                                 </div>
                             </div>
                             
                             <div class="text-center">
-                                <button id="continue-after-presurvey" class="btn btn-success btn-lg">Continue to Dashboard</button>
+                                <button id="continue-after-presurvey" class="btn btn-success btn-lg" data-lang-key="continue_to_dashboard">Continue to Dashboard</button>
                             </div>
                         </div>
                     </div>
@@ -120,6 +122,7 @@
 
     <!-- Page 3: Dashboard -->
     <div id="page-dashboard" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -128,8 +131,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0">Video Dashboard</h1>
-                        <p class="mb-0" id="dashboard-subtitle">Welcome back, <span id="dashboard-participant-name"></span></p>
+                        <h1 class="mb-0" data-lang-key="dashboard_title">Video Dashboard</h1>
+                        <p class="mb-0" id="dashboard-subtitle" data-lang-key="dashboard_welcome">Welcome back, <span id="dashboard-participant-name"></span></p>
                     </div>
                 </div>
             </div>
@@ -139,13 +142,13 @@
                     <!-- Progress Summary -->
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <h5>Your Progress</h5>
+                            <h5 data-lang-key="your_progress">Your Progress</h5>
                             <div class="progress mb-3" style="height: 30px;">
                                 <div class="progress-bar bg-success" role="progressbar" id="dashboard-progress-bar" style="width: 0%">
-                                    <span id="dashboard-progress-text">0/4 Videos Completed</span>
+                                    <span id="dashboard-progress-text" data-lang-key="videos_completed">0/4 Videos Completed</span>
                                 </div>
                             </div>
-                            <p class="text-muted mb-0">You have 2.5 weeks to complete all 4 videos</p>
+                            <p class="text-muted mb-0" data-lang-key="time_limit">You have 2.5 weeks to complete all 4 videos</p>
                         </div>
                     </div>
                     
@@ -157,9 +160,9 @@
                     <!-- Post-Survey Button (shown when all videos complete) -->
                     <div id="post-survey-section" class="card mt-4 d-none">
                         <div class="card-body text-center">
-                            <h5 class="text-success"><i class="bi bi-check-circle-fill me-2"></i>All Videos Completed!</h5>
-                            <p>Please complete the final post-survey to finish the experiment.</p>
-                            <button id="start-post-survey" class="btn btn-success btn-lg">Start Post-Survey</button>
+                            <h5 class="text-success"><i class="bi bi-check-circle-fill me-2"></i><span data-lang-key="all_videos_completed">All Videos Completed!</span></h5>
+                            <p data-lang-key="final_survey_prompt">Please complete the final post-survey to finish the experiment.</p>
+                            <button id="start-post-survey" class="btn btn-success btn-lg" data-lang-key="start_post_survey">Start Post-Survey</button>
                         </div>
                     </div>
                 </div>
@@ -169,6 +172,7 @@
 
     <!-- Page 4-7: Video Task Pages (4 videos) -->
     <div id="page-video-task" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -177,8 +181,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0" id="video-task-title">Video Task</h1>
-                        <p class="mb-0" id="video-task-subtitle">Analyze your teaching reflection and receive feedback</p>
+                        <h1 class="mb-0" id="video-task-title" data-lang-key="video_task_title">Video Task</h1>
+                        <p class="mb-0" id="video-task-subtitle" data-lang-key="video_task_subtitle">Analyze your teaching reflection and receive feedback</p>
                     </div>
                 </div>
             </div>
@@ -187,32 +191,32 @@
                 <!-- Settings Panel -->
                 <div class="col-md-2">
                     <div class="card">
-                        <div class="card-header">Settings</div>
+                        <div class="card-header" data-lang-key="settings">Settings</div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="form-label">Participant Code:</label>
+                                <label class="form-label" data-lang-key="participant_code_label">Participant Code:</label>
                                 <input type="text" class="form-control" id="task-participant-code" readonly>
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Video:</label>
+                                <label class="form-label" data-lang-key="video_label">Video:</label>
                                 <input type="text" class="form-control" id="task-video-name" readonly>
                             </div>
                             
                             <div class="language-toggle mb-3">
-                                <label>Language:</label>
+                                <label data-lang-key="language">Language:</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-en" checked>
+                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-en">
                                     <label class="form-check-label" for="task-lang-en">English</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-de">
+                                    <input class="form-check-input" type="radio" name="task-language" id="task-lang-de" checked>
                                     <label class="form-check-label" for="task-lang-de">Deutsch</label>
                                 </div>
                             </div>
                             
-                            <button id="back-to-dashboard" class="btn btn-outline-secondary btn-sm w-100">
-                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            <button id="back-to-dashboard" class="btn btn-outline-secondary btn-sm w-100" data-lang-key="back_to_dashboard">
+                                <i class="bi bi-arrow-left me-1"></i><span data-lang-key="back_to_dashboard">Back to Dashboard</span>
                             </button>
                         </div>
                     </div>
@@ -221,18 +225,18 @@
                 <!-- Input Panel -->
                 <div class="col-md-4">
                     <div class="card h-100">
-                        <div class="card-header">Student Teacher Reflection</div>
+                        <div class="card-header" data-lang-key="reflection_input">Student Teacher Reflection</div>
                         <div class="card-body d-flex flex-column position-relative">
-                            <textarea id="task-reflection-text" class="form-control flex-grow-1 mb-3" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
+                            <textarea id="task-reflection-text" class="form-control flex-grow-1 mb-3" data-lang-key-placeholder="paste_reflection" placeholder="Paste your reflection here..." spellcheck="false"></textarea>
                             
                             <div class="input-actions mt-auto">
-                                <button id="task-clear-btn" class="btn btn-secondary">Clear</button>
+                                <button id="task-clear-btn" class="btn btn-secondary" data-lang-key="clear">Clear</button>
                                 <div id="task-word-count-container" class="text-muted">
-                                    <span id="task-word-count">0</span> words
+                                    <span id="task-word-count">0</span> <span data-lang-key="words">words</span>
                                 </div>
-                                <button id="task-generate-btn" class="btn btn-primary">Generate Feedback</button>
-                                <button id="task-submit-final" class="btn btn-success btn-lg mt-2" style="display: none;">
-                                    <i class="bi bi-check-circle"></i> Submit Final Reflection
+                                <button id="task-generate-btn" class="btn btn-primary" data-lang-key="generate_feedback">Generate Feedback</button>
+                                <button id="task-submit-final" class="btn btn-success btn-lg mt-2" style="display: none;" data-lang-key="submit_final">
+                                    <i class="bi bi-check-circle"></i> <span data-lang-key="submit_final">Submit Final Reflection</span>
                                 </button>
                             </div>
                         </div>
@@ -243,7 +247,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <span>Generated Feedback</span>
+                            <span data-lang-key="generated_feedback">Generated Feedback</span>
                         </div>
                         <div class="card-body d-flex flex-column position-relative">
                             <div id="task-loading-spinner" class="loading-spinner">
@@ -256,7 +260,7 @@
                             <!-- Percentage Explanation -->
                             <div id="percentage-explanation" class="alert alert-info d-none mb-3">
                                 <i class="bi bi-info-circle me-2"></i>
-                                <strong>Note:</strong> The percentages may add up to more than 100% because a single passage can receive multiple codes (Description, Explanation, and Prediction).
+                                <strong data-lang-key="note">Note:</strong> <span data-lang-key="percentage_explanation">The percentages may add up to more than 100% because a single passage can receive multiple codes (Description, Explanation, and Prediction).</span>
                             </div>
                             
                             <div id="task-feedback-display" class="form-control h-100 flex-grow-1 mb-3">
@@ -271,12 +275,12 @@
                                 <div class="tab-content" id="task-feedback-tab-content">
                                     <div class="tab-pane fade show active" id="task-feedback-extended-pane" role="tabpanel">
                                         <div id="task-feedback-extended" class="feedback-content">
-                                            <p class="text-muted">Feedback will appear here after generation...</p>
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="task-feedback-short-pane" role="tabpanel">
                                         <div id="task-feedback-short" class="feedback-content">
-                                            <p class="text-muted">Feedback will appear here after generation...</p>
+                                            <p class="text-muted" data-lang-key="feedback_placeholder">Feedback will appear here after generation...</p>
                                         </div>
                                     </div>
                                 </div>
@@ -284,11 +288,11 @@
                             
                             <div class="mt-auto">
                                 <div class="feedback-options">
-                                    <button id="task-copy-btn" class="btn btn-outline-secondary">
-                                        <i class="bi bi-clipboard"></i> Copy
+                                    <button id="task-copy-btn" class="btn btn-outline-secondary" data-lang-key="copy">
+                                        <i class="bi bi-clipboard"></i> <span data-lang-key="copy">Copy</span>
                                     </button>
-                                    <button id="task-revise-btn" class="btn btn-outline-info" style="display: none;">
-                                        <i class="bi bi-pencil-square"></i> Revise Reflection
+                                    <button id="task-revise-btn" class="btn btn-outline-info" style="display: none;" data-lang-key="revise_reflection">
+                                        <i class="bi bi-pencil-square"></i> <span data-lang-key="revise_reflection">Revise Reflection</span>
                                     </button>
                                 </div>
                             </div>
@@ -304,9 +308,9 @@
                         <div>
                             <h5 class="mb-2">
                                 <i class="bi bi-lightbulb-fill text-warning me-2"></i>
-                                Learn the Key Concepts for Better Reflection
+                                <span data-lang-key="learn_key_concepts">Learn the Key Concepts for Better Reflection</span>
                             </h5>
-                            <p class="mb-0 text-muted">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
+                            <p class="mb-0 text-muted" data-lang-key="concepts_help">Understanding these three dimensions will help you write more comprehensive teaching reflections</p>
                         </div>
                         <div class="expand-indicator">
                             <i class="bi bi-chevron-down"></i>
@@ -317,18 +321,18 @@
                     <div class="definitions-grid">
                         <div class="definition-card description-card">
                             <div class="definition-icon">📝</div>
-                            <h6>Description</h6>
-                            <p>Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
+                            <h6 data-lang-key="description">Description</h6>
+                            <p data-lang-key="description_def">Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.</p>
                         </div>
                         <div class="definition-card explanation-card">
                             <div class="definition-icon">🔍</div>
-                            <h6>Explanation</h6>
-                            <p>Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
+                            <h6 data-lang-key="explanation">Explanation</h6>
+                            <p data-lang-key="explanation_def">Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.</p>
                         </div>
                         <div class="definition-card prediction-card">
                             <div class="definition-icon">🔮</div>
-                            <h6>Prediction</h6>
-                            <p>Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
+                            <h6 data-lang-key="prediction">Prediction</h6>
+                            <p data-lang-key="prediction_def">Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.</p>
                         </div>
                     </div>
                 </div>
@@ -338,6 +342,7 @@
 
     <!-- Page 8-11: Post-Video Surveys (4 surveys) -->
     <div id="page-post-video-survey" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -346,8 +351,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0" id="post-video-survey-title">Post-Video Survey</h1>
-                        <p class="mb-0" id="post-video-survey-subtitle">Please share your thoughts about this video</p>
+                        <h1 class="mb-0" id="post-video-survey-title" data-lang-key="post_video_survey_title">Post-Video Survey</h1>
+                        <p class="mb-0" id="post-video-survey-subtitle" data-lang-key="post_video_survey_subtitle">Please share your thoughts about this video</p>
                     </div>
                 </div>
             </div>
@@ -359,8 +364,8 @@
                             <div class="qualtrics-survey-section border rounded p-4 mb-4">
                                 <div class="row">
                                     <div class="col-12">
-                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Post-Video Questionnaire</h6>
-                                        <p class="text-muted mb-3">Please complete the questionnaire below. This takes about 3-5 minutes.</p>
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i><span data-lang-key="post_video_questionnaire">Post-Video Questionnaire</span></h6>
+                                        <p class="text-muted mb-3" data-lang-key="post_video_questionnaire_description">Please complete the questionnaire below. This takes about 3-5 minutes.</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -371,13 +376,13 @@
                                     </div>
                                 </div>
                                 <div class="alert alert-success mt-3 mb-0">
-                                    <small><i class="bi bi-check-circle me-1"></i><strong>Next Step:</strong> 
-                                    Complete the questionnaire above, then click "Return to Dashboard" below.</small>
+                                    <small><i class="bi bi-check-circle me-1"></i><strong data-lang-key="next_step">Next Step:</strong> 
+                                    <span data-lang-key="post_video_instructions">Complete the questionnaire above, then click "Return to Dashboard" below.</span></small>
                                 </div>
                             </div>
                             
                             <div class="text-center">
-                                <button id="continue-after-post-video-survey" class="btn btn-success btn-lg">Return to Dashboard</button>
+                                <button id="continue-after-post-video-survey" class="btn btn-success btn-lg" data-lang-key="return_to_dashboard">Return to Dashboard</button>
                             </div>
                         </div>
                     </div>
@@ -388,6 +393,7 @@
 
     <!-- Page 12: Post-Survey (Final) -->
     <div id="page-postsurvey" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -396,8 +402,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0">Final Post-Survey</h1>
-                        <p class="mb-0">Thank you for completing all videos!</p>
+                        <h1 class="mb-0" data-lang-key="final_post_survey_title">Final Post-Survey</h1>
+                        <p class="mb-0" data-lang-key="final_post_survey_subtitle">Thank you for completing all videos!</p>
                     </div>
                 </div>
             </div>
@@ -409,8 +415,8 @@
                             <div class="qualtrics-survey-section border rounded p-4 mb-4">
                                 <div class="row">
                                     <div class="col-12">
-                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i>Final Post-Survey</h6>
-                                        <p class="text-muted mb-3">Please complete the final survey below. This takes about 10-15 minutes.</p>
+                                        <h6 class="mb-2"><i class="bi bi-chat-square-text me-2"></i><span data-lang-key="final_post_survey_title">Final Post-Survey</span></h6>
+                                        <p class="text-muted mb-3" data-lang-key="final_post_survey_description">Please complete the final survey below. This takes about 10-15 minutes.</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -421,13 +427,13 @@
                                     </div>
                                 </div>
                                 <div class="alert alert-success mt-3 mb-0">
-                                    <small><i class="bi bi-check-circle me-1"></i><strong>Final Step:</strong> 
-                                    Complete the survey above, then click "Complete Study" below to finish.</small>
+                                    <small><i class="bi bi-check-circle me-1"></i><strong data-lang-key="final_step">Final Step:</strong> 
+                                    <span data-lang-key="final_survey_instructions">Complete the survey above, then click "Complete Study" below to finish.</span></small>
                                 </div>
                             </div>
                             
                             <div class="text-center">
-                                <button id="complete-study" class="btn btn-success btn-lg">Complete Study</button>
+                                <button id="complete-study" class="btn btn-success btn-lg" data-lang-key="complete_study">Complete Study</button>
                             </div>
                         </div>
                     </div>
@@ -438,6 +444,7 @@
 
     <!-- Page 13: Thank You -->
     <div id="page-thankyou" class="page-container d-none">
+        <div class="language-switcher-container my-3"></div>
         <div class="main-container">
             <div class="header text-center">
                 <div class="position-relative">
@@ -446,8 +453,8 @@
                         <img src="UNC_logo.avif" alt="UNC Logo" style="height: 35px;">
                     </div>
                     <div class="text-center pt-3">
-                        <h1 class="mb-0">Thank You!</h1>
-                        <p class="mb-0">Your participation is complete</p>
+                        <h1 class="mb-0" data-lang-key="thank_you_title">Thank You!</h1>
+                        <p class="mb-0" data-lang-key="participation_complete">Your participation is complete</p>
                     </div>
                 </div>
             </div>
@@ -457,9 +464,9 @@
                     <div class="card">
                         <div class="card-body text-center py-5">
                             <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
-                            <h3 class="mt-4 mb-3">Study Complete!</h3>
-                            <p class="lead">Thank you for your time and thoughtful reflections.</p>
-                            <p>Your contributions help improve teacher education and feedback systems.</p>
+                            <h3 class="mt-4 mb-3" data-lang-key="study_complete">Study Complete!</h3>
+                            <p class="lead" data-lang-key="thank_you_message">Thank you for your time and thoughtful reflections.</p>
+                            <p data-lang-key="contribution_message">Your contributions help improve teacher education and feedback systems.</p>
                         </div>
                     </div>
                 </div>
@@ -474,17 +481,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="feedback-preference-modal-label">Choose Your Preferred Feedback Style</h5>
+                    <h5 class="modal-title" id="feedback-preference-modal-label" data-lang-key="choose_feedback_style">Choose Your Preferred Feedback Style</h5>
                 </div>
                 <div class="modal-body">
-                    <p>We generate two types of feedback. Which would you like to see first?</p>
+                    <p data-lang-key="feedback_style_intro">We generate two types of feedback. Which would you like to see first?</p>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="card h-100 feedback-option-card" data-style="extended">
                                 <div class="card-body text-center">
                                     <i class="bi bi-journal-text text-primary mb-3" style="font-size: 2.5rem;"></i>
-                                    <h6>Extended Feedback</h6>
-                                    <p class="small text-muted">Detailed academic feedback with comprehensive analysis and educational theory references</p>
+                                    <h6 data-lang-key="extended">Extended Feedback</h6>
+                                    <p class="small text-muted" data-lang-key="extended_description">Detailed academic feedback with comprehensive analysis and educational theory references</p>
                                 </div>
                             </div>
                         </div>
@@ -492,17 +499,17 @@
                             <div class="card h-100 feedback-option-card" data-style="short">
                                 <div class="card-body text-center">
                                     <i class="bi bi-card-text text-success mb-3" style="font-size: 2.5rem;"></i>
-                                    <h6>Short Feedback</h6>
-                                    <p class="small text-muted">Concise, easy-to-read feedback with key points and practical tips</p>
+                                    <h6 data-lang-key="short">Short Feedback</h6>
+                                    <p class="small text-muted" data-lang-key="short_description">Concise, easy-to-read feedback with key points and practical tips</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <p class="text-muted small mt-3">You can switch between both styles anytime using the tabs after feedback is generated.</p>
+                    <p class="text-muted small mt-3" data-lang-key="can_switch_later">You can switch between both styles anytime using the tabs after feedback is generated.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary" id="select-extended-first">Start with Extended</button>
-                    <button type="button" class="btn btn-outline-success" id="select-short-first">Start with Short</button>
+                    <button type="button" class="btn btn-outline-primary" id="select-extended-first" data-lang-key="select_extended">Start with Extended</button>
+                    <button type="button" class="btn btn-outline-success" id="select-short-first" data-lang-key="select_short">Start with Short</button>
                 </div>
             </div>
         </div>
@@ -513,18 +520,18 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="final-submission-modal-label">Confirm Final Submission</h5>
+                    <h5 class="modal-title" id="final-submission-modal-label" data-lang-key="confirm_final_submission">Confirm Final Submission</h5>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
                         <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
                     </div>
-                    <p>Are you sure you want to submit your final reflection? After submission, you won't be able to make any more changes to this task.</p>
-                    <p class="text-muted">You can continue revising your reflection until you're satisfied, then click this button when you're ready to move on.</p>
+                    <p data-lang-key="final_submission_warning">Are you sure you want to submit your final reflection? After submission, you won't be able to make any more changes to this task.</p>
+                    <p class="text-muted" data-lang-key="final_submission_note">You can continue revising your reflection until you're satisfied, then click this button when you're ready to move on.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Editing</button>
-                    <button type="button" class="btn btn-success" id="confirm-final-submission">Yes, Submit Final</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-lang-key="continue_editing">Continue Editing</button>
+                    <button type="button" class="btn btn-success" id="confirm-final-submission" data-lang-key="confirm_submit">Yes, Submit Final</button>
                 </div>
             </div>
         </div>
@@ -537,17 +544,17 @@
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        Tab Switch Detected
+                        <span data-lang-key="ai_usage_title">Tab Switch Detected</span>
                     </h5>
                 </div>
                 <div class="modal-body">
-                    <p>We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?</p>
+                    <p data-lang-key="ai_usage_message">We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" onclick="handleAIUsageResponse(true)">
+                    <button type="button" class="btn btn-danger" onclick="handleAIUsageResponse(true)" data-lang-key="ai_usage_yes">
                         Yes, I used AI
                     </button>
-                    <button type="button" class="btn btn-success" onclick="handleAIUsageResponse(false)">
+                    <button type="button" class="btn btn-success" onclick="handleAIUsageResponse(false)" data-lang-key="ai_usage_no">
                         No, I did not use AI
                     </button>
                 </div>

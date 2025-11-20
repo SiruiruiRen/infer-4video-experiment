@@ -22,7 +22,9 @@ You have a complete, production-ready 4-video experiment version ready to deploy
 2. **Get Credentials**
    - Go to: Settings → API
    - Copy **Project URL** (e.g., `https://xxxxx.supabase.co`)
+   https://cvmzsljalmkrehfkqjtc.supabase.co
    - Copy **anon public** key (starts with `eyJhbGci...`)
+   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2bXpzbGphbG1rcmVoZmtxanRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1OTM5MzIsImV4cCI6MjA3OTE2OTkzMn0.0IxG1T574aCCH6pxfn8tgGrzw3XUuDKFPE8YQQkV9T4
 
 3. **Run Schema**
    - Go to: SQL Editor → New Query

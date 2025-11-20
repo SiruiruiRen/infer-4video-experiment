@@ -42,7 +42,7 @@ const QUALTRICS_SURVEYS = {
 
 // Global state
 let currentPage = 'login';
-let currentLanguage = 'en';
+let currentLanguage = 'de'; // Default to German
 let userPreferredFeedbackStyle = 'extended';
 let currentSessionId = null;
 let supabase = null;
@@ -64,11 +64,92 @@ let tabSwitchCount = 0;
 let lastHiddenTime = null;
 let hasAskedAboutAI = false;
 
-// Language translations (simplified for 4-video version)
+// Language translations (comprehensive for 4-video version)
 const translations = {
     en: {
         title: "INFER",
         subtitle: "An intelligent feedback system for observing classroom videos",
+        login_title: "Enter Your Participant Code",
+        code_help_text: "Create a code: First letter of mother's first name + birth month (2 digits) + birth year (2 digits).",
+        code_example: "Example: Mother named Anna, born in August 1995 → A0895",
+        participant_code_label: "Participant Code:",
+        code_placeholder: "e.g., A0895",
+        continue_button: "Continue",
+        pre_survey_title: "Pre-Survey",
+        pre_survey_subtitle: "Please complete the pre-survey before starting",
+        pre_survey_description: "Please complete the survey below. This takes about 5-10 minutes.",
+        next_step: "Next Step:",
+        pre_survey_instructions: "Complete the survey above, then click \"Continue to Dashboard\" below.",
+        continue_to_dashboard: "Continue to Dashboard",
+        dashboard_title: "Video Dashboard",
+        dashboard_welcome: "Welcome back, ",
+        your_progress: "Your Progress",
+        videos_completed: "0/4 Videos Completed",
+        time_limit: "You have 2.5 weeks to complete all 4 videos",
+        all_videos_completed: "All Videos Completed!",
+        final_survey_prompt: "Please complete the final post-survey to finish the experiment.",
+        start_post_survey: "Start Post-Survey",
+        video_task_title: "Video Task",
+        video_task_subtitle: "Analyze your teaching reflection and receive feedback",
+        settings: "Settings",
+        video_label: "Video:",
+        language: "Language:",
+        back_to_dashboard: "Back to Dashboard",
+        reflection_input: "Student Teacher Reflection",
+        paste_reflection: "Paste your reflection here...",
+        clear: "Clear",
+        words: "words",
+        generate_feedback: "Generate Feedback",
+        generated_feedback: "Generated Feedback",
+        feedback_placeholder: "Feedback will appear here after generation...",
+        note: "Note:",
+        percentage_explanation: "The percentages may add up to more than 100% because a single passage can receive multiple codes (Description, Explanation, and Prediction).",
+        extended: "Extended",
+        short: "Short",
+        copy: "Copy",
+        revise_reflection: "Revise Reflection",
+        submit_final: "Submit Final Reflection",
+        learn_key_concepts: "Learn the Key Concepts for Better Reflection",
+        concepts_help: "Understanding these three dimensions will help you write more comprehensive teaching reflections",
+        description: "Description",
+        description_def: "Accurately observing and reporting what happened in the classroom - specific behaviors, interactions, and events without interpretation.",
+        explanation: "Explanation",
+        explanation_def: "Interpreting observed events using educational theory, research, and pedagogical knowledge - understanding why things happened.",
+        prediction: "Prediction",
+        prediction_def: "Anticipating future outcomes and effects on student learning based on observed teaching practices and their interpretations.",
+        post_video_survey_title: "Post-Video Survey",
+        post_video_survey_subtitle: "Please share your thoughts about this video",
+        post_video_questionnaire: "Post-Video Questionnaire",
+        post_video_questionnaire_description: "Please complete the questionnaire below. This takes about 3-5 minutes.",
+        post_video_instructions: "Complete the questionnaire above, then click \"Return to Dashboard\" below.",
+        return_to_dashboard: "Return to Dashboard",
+        final_post_survey_title: "Final Post-Survey",
+        final_post_survey_subtitle: "Thank you for completing all videos!",
+        final_post_survey_description: "Please complete the final survey below. This takes about 10-15 minutes.",
+        final_step: "Final Step:",
+        final_survey_instructions: "Complete the survey above, then click \"Complete Study\" below to finish.",
+        complete_study: "Complete Study",
+        thank_you_title: "Thank You!",
+        participation_complete: "Your participation is complete",
+        study_complete: "Study Complete!",
+        thank_you_message: "Thank you for your time and thoughtful reflections.",
+        contribution_message: "Your contributions help improve teacher education and feedback systems.",
+        choose_feedback_style: "Choose Your Preferred Feedback Style",
+        feedback_style_intro: "We generate two types of feedback. Which would you like to see first?",
+        extended_description: "Detailed academic feedback with comprehensive analysis and educational theory references",
+        short_description: "Concise, easy-to-read feedback with key points and practical tips",
+        can_switch_later: "You can switch between both styles anytime using the tabs after feedback is generated.",
+        select_extended: "Start with Extended",
+        select_short: "Start with Short",
+        confirm_final_submission: "Confirm Final Submission",
+        final_submission_warning: "Are you sure you want to submit your final reflection? After submission, you won't be able to make any more changes to this task.",
+        final_submission_note: "You can continue revising your reflection until you're satisfied, then click this button when you're ready to move on.",
+        continue_editing: "Continue Editing",
+        confirm_submit: "Yes, Submit Final",
+        ai_usage_title: "Tab Switch Detected",
+        ai_usage_message: "We noticed you switched to another tab. Did you use another AI system (such as ChatGPT) for your work on this task?",
+        ai_usage_yes: "Yes, I used AI",
+        ai_usage_no: "No, I did not use AI",
         loading_messages: [
             "Please wait while the little elves create your feedback...",
             "Almost there, we promise...",
@@ -80,6 +161,87 @@ const translations = {
     de: {
         title: "INFER",
         subtitle: "Ein intelligentes Feedback-System zur Beobachtung von Unterricht",
+        login_title: "Geben Sie Ihren Teilnehmer-Code ein",
+        code_help_text: "Erstellen Sie einen Code: Erster Buchstabe des Vornamens der Mutter + Geburtsmonat (2 Ziffern) + Geburtsjahr (2 Ziffern).",
+        code_example: "Beispiel: Mutter heißt Anna, geboren im August 1995 → A0895",
+        participant_code_label: "Ihr Teilnehmer-Code:",
+        code_placeholder: "z.B. A0895",
+        continue_button: "Weiter",
+        pre_survey_title: "Vor-Umfrage",
+        pre_survey_subtitle: "Bitte vervollständigen Sie die Vor-Umfrage, bevor Sie beginnen",
+        pre_survey_description: "Bitte vervollständigen Sie die Umfrage unten. Dies dauert etwa 5-10 Minuten.",
+        next_step: "Nächster Schritt:",
+        pre_survey_instructions: "Vervollständigen Sie die Umfrage oben und klicken Sie dann unten auf \"Weiter zum Dashboard\".",
+        continue_to_dashboard: "Weiter zum Dashboard",
+        dashboard_title: "Video-Dashboard",
+        dashboard_welcome: "Willkommen zurück, ",
+        your_progress: "Ihr Fortschritt",
+        videos_completed: "0/4 Videos abgeschlossen",
+        time_limit: "Sie haben 2,5 Wochen Zeit, um alle 4 Videos zu vervollständigen",
+        all_videos_completed: "Alle Videos abgeschlossen!",
+        final_survey_prompt: "Bitte vervollständigen Sie die abschließende Nach-Umfrage, um das Experiment abzuschließen.",
+        start_post_survey: "Nach-Umfrage starten",
+        video_task_title: "Video-Aufgabe",
+        video_task_subtitle: "Analysieren Sie Ihre Unterrichtsreflexion und erhalten Sie Feedback",
+        settings: "Einstellungen",
+        video_label: "Video:",
+        language: "Sprache:",
+        back_to_dashboard: "Zurück zum Dashboard",
+        reflection_input: "Reflexionstext",
+        paste_reflection: "Fügen Sie hier Ihre Reflexion ein...",
+        clear: "Löschen",
+        words: "Wörter",
+        generate_feedback: "Feedback generieren",
+        generated_feedback: "Generiertes Feedback",
+        feedback_placeholder: "Feedback wird hier nach der Generierung angezeigt...",
+        note: "Hinweis:",
+        percentage_explanation: "Die Prozentsätze können mehr als 100% ergeben, da ein einzelner Abschnitt mehrere Codes erhalten kann (Beschreibung, Erklärung und Vorhersage).",
+        extended: "Erweitert",
+        short: "Kurz",
+        copy: "Kopieren",
+        revise_reflection: "Reflexion überarbeiten",
+        submit_final: "Endgültige Reflexion einreichen",
+        learn_key_concepts: "Lernen Sie die Schlüsselkonzepte für bessere Reflexion",
+        concepts_help: "Das Verständnis dieser drei Dimensionen hilft Ihnen, umfassendere Unterrichtsreflexionen zu schreiben",
+        description: "Beschreibung",
+        description_def: "Genaues Beobachten und Berichten des Geschehens im Klassenzimmer - spezifische Verhaltensweisen, Interaktionen und Ereignisse ohne Interpretation.",
+        explanation: "Erklärung",
+        explanation_def: "Interpretation von beobachteten Ereignissen mittels pädagogischer Theorie, Forschung und pädagogischem Wissen - Verstehen, warum Dinge passiert sind.",
+        prediction: "Vorhersage",
+        prediction_def: "Antizipation zukünftiger Ergebnisse und Auswirkungen auf das Lernen der Schüler basierend auf beobachteten Unterrichtspraktiken und deren Interpretationen.",
+        post_video_survey_title: "Nach-Video-Umfrage",
+        post_video_survey_subtitle: "Bitte teilen Sie Ihre Gedanken zu diesem Video mit",
+        post_video_questionnaire: "Nach-Video-Fragebogen",
+        post_video_questionnaire_description: "Bitte vervollständigen Sie den Fragebogen unten. Dies dauert etwa 3-5 Minuten.",
+        post_video_instructions: "Vervollständigen Sie den Fragebogen oben und klicken Sie dann unten auf \"Zurück zum Dashboard\".",
+        return_to_dashboard: "Zurück zum Dashboard",
+        final_post_survey_title: "Abschließende Nach-Umfrage",
+        final_post_survey_subtitle: "Vielen Dank, dass Sie alle Videos abgeschlossen haben!",
+        final_post_survey_description: "Bitte vervollständigen Sie die abschließende Umfrage unten. Dies dauert etwa 10-15 Minuten.",
+        final_step: "Letzter Schritt:",
+        final_survey_instructions: "Vervollständigen Sie die Umfrage oben und klicken Sie dann unten auf \"Studie abschließen\", um fertig zu werden.",
+        complete_study: "Studie abschließen",
+        thank_you_title: "Vielen Dank!",
+        participation_complete: "Ihre Teilnahme ist abgeschlossen",
+        study_complete: "Studie abgeschlossen!",
+        thank_you_message: "Vielen Dank für Ihre Zeit und Ihre durchdachten Reflexionen.",
+        contribution_message: "Ihre Beiträge helfen, die Lehrerausbildung und Feedback-Systeme zu verbessern.",
+        choose_feedback_style: "Wählen Sie Ihren bevorzugten Feedback-Stil",
+        feedback_style_intro: "Wir generieren zwei Arten von Feedback. Welches möchten Sie zuerst sehen?",
+        extended_description: "Detailliertes akademisches Feedback mit umfassender Analyse und pädagogischen Theoriereferenzen",
+        short_description: "Prägnantes, leicht lesbares Feedback mit Kernpunkten und praktischen Tipps",
+        can_switch_later: "Sie können jederzeit zwischen beiden Stilen wechseln, nachdem das Feedback generiert wurde.",
+        select_extended: "Mit Erweitert beginnen",
+        select_short: "Mit Kurz beginnen",
+        confirm_final_submission: "Endgültige Einreichung bestätigen",
+        final_submission_warning: "Sind Sie sicher, dass Sie Ihre endgültige Reflexion einreichen möchten? Nach der Einreichung können Sie keine Änderungen mehr an dieser Aufgabe vornehmen.",
+        final_submission_note: "Sie können Ihre Reflexion weiterhin überarbeiten, bis Sie zufrieden sind. Klicken Sie dann auf diese Schaltfläche, wenn Sie bereit sind, fortzufahren.",
+        continue_editing: "Weiter bearbeiten",
+        confirm_submit: "Ja, endgültig einreichen",
+        ai_usage_title: "Tab-Wechsel erkannt",
+        ai_usage_message: "Wir haben bemerkt, dass Sie zu einem anderen Tab gewechselt haben. Haben Sie ein anderes KI-System (wie ChatGPT) für Ihre Arbeit an dieser Aufgabe verwendet?",
+        ai_usage_yes: "Ja, ich habe KI verwendet",
+        ai_usage_no: "Nein, ich habe keine KI verwendet",
         loading_messages: [
             "Bitte warten Sie, während die kleinen Elfen Ihr Feedback erstellen...",
             "Fast geschafft, wir versprechen es...",
@@ -107,11 +269,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // Initialize app
 function initializeApp() {
     setupEventListeners();
+    renderLanguageSwitchers();
+    applyTranslations();
     showPage('login');
+    
+    // Set default language to German
+    switchLanguage('de');
     
     // Log session start
     logEvent('session_start', {
         entry_page: 'login',
+        language: currentLanguage,
         user_agent: navigator.userAgent,
         screen_width: window.screen.width,
         screen_height: window.screen.height
@@ -147,9 +315,18 @@ function setupEventListeners() {
     document.getElementById('back-to-dashboard')?.addEventListener('click', () => showPage('dashboard'));
     document.getElementById('task-reflection-text')?.addEventListener('input', () => updateWordCount());
     
-    // Language switchers
+    // Language switchers (for task page)
     document.getElementById('task-lang-en')?.addEventListener('change', () => switchLanguage('en'));
     document.getElementById('task-lang-de')?.addEventListener('change', () => switchLanguage('de'));
+    
+    // Language switchers (for all pages via language-switcher-container)
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'lang-switch-en') {
+            switchLanguage('en');
+        } else if (e.target.id === 'lang-switch-de') {
+            switchLanguage('de');
+        }
+    });
     
     // Feedback tabs
     document.getElementById('task-extended-tab')?.addEventListener('click', () => {
@@ -251,10 +428,16 @@ function showPage(pageId) {
             updateProgressBar();
         }
         
+        // Apply translations for new page
+        applyTranslations();
+        
+        // Log page view with participant info
         logEvent('page_view', {
             page: pageId,
             from_page: previousPage,
             video_id: currentVideoId,
+            participant_name: currentParticipant || null,
+            language: currentLanguage,
             timestamp: new Date().toISOString()
         });
     }
@@ -905,13 +1088,74 @@ async function markVideoCompleted() {
 }
 
 // Language switching
+// Language Management Functions
 function switchLanguage(lang) {
     currentLanguage = lang;
+    renderLanguageSwitchers();
+    applyTranslations();
+    
+    // Update all language radio buttons
     document.querySelectorAll('input[type="radio"][name^="task-language"]').forEach(radio => {
         if (radio.id.includes(`lang-${lang}`)) {
             radio.checked = true;
         }
     });
+    
+    // Log language change with participant info
+    logEvent('language_change', {
+        new_language: lang,
+        participant_name: currentParticipant || null,
+        page: currentPage,
+        video_id: currentVideoId
+    });
+}
+
+function renderLanguageSwitchers() {
+    const containers = document.querySelectorAll('.language-switcher-container');
+    containers.forEach(container => {
+        container.innerHTML = `
+            <div class="d-flex justify-content-end">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn ${currentLanguage === 'en' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-en">English</button>
+                    <button type="button" class="btn ${currentLanguage === 'de' ? 'btn-primary' : 'btn-outline-primary'}" id="lang-switch-de">Deutsch</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Add event listeners
+    document.getElementById('lang-switch-en')?.addEventListener('click', () => switchLanguage('en'));
+    document.getElementById('lang-switch-de')?.addEventListener('click', () => switchLanguage('de'));
+}
+
+function applyTranslations() {
+    const t = translations[currentLanguage];
+    if (!t) return;
+    
+    // Update all elements with data-lang-key attribute
+    document.querySelectorAll('[data-lang-key]').forEach(element => {
+        const key = element.getAttribute('data-lang-key');
+        if (t[key]) {
+            // Check if it's a placeholder
+            if (element.hasAttribute('data-lang-key-placeholder')) {
+                element.placeholder = t[key];
+            } else {
+                element.textContent = t[key];
+            }
+        }
+    });
+    
+    // Update elements with inner HTML (like buttons with icons)
+    document.querySelectorAll('[data-lang-key]').forEach(element => {
+        const key = element.getAttribute('data-lang-key');
+        if (t[key] && element.tagName === 'BUTTON' && element.querySelector('span[data-lang-key]')) {
+            const span = element.querySelector('span[data-lang-key]');
+            if (span) span.textContent = t[key];
+        }
+    });
+    
+    // Update HTML lang attribute
+    document.documentElement.lang = currentLanguage;
 }
 
 // AI Usage Modal
