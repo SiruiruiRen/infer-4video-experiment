@@ -735,7 +735,10 @@ async function markPreSurveyComplete() {
         if (error) console.error('Error marking pre-survey complete:', error);
         else {
             currentParticipantProgress.pre_survey_completed = true;
-            logEvent('pre_survey_completed', { participant_name: currentParticipant });
+            logEvent('pre_survey_completed', { 
+                participant_name: currentParticipant,
+                language: currentLanguage
+            });
         }
     } catch (error) {
         console.error('Error in markPreSurveyComplete:', error);
@@ -787,7 +790,10 @@ async function markPostSurveyComplete() {
         if (error) console.error('Error marking post-survey complete:', error);
         else {
             currentParticipantProgress.post_survey_completed = true;
-            logEvent('post_survey_completed', { participant_name: currentParticipant });
+            logEvent('post_survey_completed', { 
+                participant_name: currentParticipant,
+                language: currentLanguage
+            });
         }
     } catch (error) {
         console.error('Error in markPostSurveyComplete:', error);
