@@ -100,6 +100,7 @@ const translations = {
         open_video_link: "Open Video",
         finished_watching: "I Finished Watching the Video",
         video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below.",
+        survey_completed_checkbox: "I have completed this survey",
         skip_survey: "Skip Survey",
         survey_optional: "(Optional)",
         video_task_title: "INFER Video Reflection Task",
@@ -227,6 +228,7 @@ const translations = {
         open_video_link: "Video öffnen",
         finished_watching: "Ich habe das Video angeschaut",
         video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten.",
+        survey_completed_checkbox: "Ich habe diese Umfrage abgeschlossen",
         skip_survey: "Umfrage überspringen",
         survey_optional: "(Optional)",
         video_task_title: "INFER Video-Reflexionsaufgabe",
@@ -378,7 +380,11 @@ function setupEventListeners() {
     
     // Pre-survey
     document.getElementById('continue-after-presurvey')?.addEventListener('click', () => {
-        markPreSurveyComplete();
+        // Check if survey completion checkbox is checked
+        const checkbox = document.getElementById('presurvey-completed-check');
+        if (checkbox && checkbox.checked) {
+            markPreSurveyComplete();
+        }
         showPage('dashboard');
     });
     
@@ -472,14 +478,19 @@ function setupEventListeners() {
     
     // Complete study
     document.getElementById('complete-study')?.addEventListener('click', () => {
-        markPostSurveyComplete();
+        // Check if survey completion checkbox is checked
+        const checkbox = document.getElementById('final-survey-completed-check');
+        if (checkbox && checkbox.checked) {
+            markPostSurveyComplete();
+        }
         showPage('thankyou');
     });
     
-    // Skip final survey
-    document.getElementById('skip-final-survey')?.addEventListener('click', () => {
-        markPostSurveyComplete();
-        showPage('thankyou');
+    // Final survey completion checkbox (optional)
+    document.getElementById('final-survey-completed-check')?.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            markPostSurveyComplete();
+        }
     });
     
     // Video link page check buttons (4 videos)
@@ -514,15 +525,34 @@ function setupEventListeners() {
     // Post-video survey continue buttons (4 videos)
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`continue-after-post-video-survey-${i}`)?.addEventListener('click', () => {
+            // Check if survey completion checkbox is checked
+            const checkbox = document.getElementById(`survey-completed-check-${i}`);
+            if (checkbox && checkbox.checked) {
+                markVideoSurveyComplete();
+            }
             showPage('dashboard');
             renderDashboard();
         });
         
-        document.getElementById(`skip-post-video-survey-${i}`)?.addEventListener('click', () => {
-            showPage('dashboard');
-            renderDashboard();
+        // Track checkbox status (optional - just for logging)
+        document.getElementById(`survey-completed-check-${i}`)?.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                const videoId = `video${i}`;
+                logEvent('survey_completion_marked', {
+                    video_id: videoId,
+                    participant_name: currentParticipant,
+                    survey_type: 'post_video'
+                });
+            }
         });
     }
+    
+    // Pre-survey completion checkbox (optional)
+    document.getElementById('presurvey-completed-check')?.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            markPreSurveyComplete();
+        }
+    });
     
     // Tab switching detection
     document.addEventListener('visibilitychange', handleTabSwitch);
@@ -1516,6 +1546,21 @@ function loadSurvey(surveyType) {
         if (iframe) {
             iframe.src = surveyUrl;
         }
+        
+        // Update checkbox state based on completion status
+        const checkbox = document.getElementById(`survey-completed-check-${videoNum}`);
+        const videoId = `video${videoNum}`;
+        const isCompleted = currentParticipantProgress?.video_surveys?.[videoId] || false;
+        if (checkbox) {
+            checkbox.checked = isCompleted;
+        }
+    } else if (surveyType === 'post') {
+        // Update final survey checkbox state
+        const checkbox = document.getElementById('final-survey-completed-check');
+        const isCompleted = currentParticipantProgress?.post_survey_completed || false;
+        if (checkbox) {
+            checkbox.checked = isCompleted;
+        }
     }
 }
 
@@ -1526,6 +1571,12 @@ function updatePreSurveyPage() {
     const description = document.getElementById('presurvey-description');
     const instructions = document.getElementById('presurvey-instructions');
     const continueBtn = document.getElementById('continue-after-presurvey');
+    const checkbox = document.getElementById('presurvey-completed-check');
+    
+    // Update checkbox state
+    if (checkbox) {
+        checkbox.checked = isCompleted;
+    }
     
     if (isCompleted) {
         // Show completion status
