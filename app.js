@@ -1547,19 +1547,16 @@ function loadSurvey(surveyType) {
             iframe.src = surveyUrl;
         }
         
-        // Update checkbox state based on completion status
+        // Checkbox starts unchecked - user must manually check it
         const checkbox = document.getElementById(`survey-completed-check-${videoNum}`);
-        const videoId = `video${videoNum}`;
-        const isCompleted = currentParticipantProgress?.video_surveys?.[videoId] || false;
         if (checkbox) {
-            checkbox.checked = isCompleted;
+            checkbox.checked = false;
         }
     } else if (surveyType === 'post') {
-        // Update final survey checkbox state
+        // Checkbox starts unchecked - user must manually check it
         const checkbox = document.getElementById('final-survey-completed-check');
-        const isCompleted = currentParticipantProgress?.post_survey_completed || false;
         if (checkbox) {
-            checkbox.checked = isCompleted;
+            checkbox.checked = false;
         }
     }
 }
@@ -1573,9 +1570,9 @@ function updatePreSurveyPage() {
     const continueBtn = document.getElementById('continue-after-presurvey');
     const checkbox = document.getElementById('presurvey-completed-check');
     
-    // Update checkbox state
+    // Checkbox starts unchecked - user must manually check it
     if (checkbox) {
-        checkbox.checked = isCompleted;
+        checkbox.checked = false;
     }
     
     if (isCompleted) {
