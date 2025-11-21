@@ -108,7 +108,7 @@ body {
 .header-full-width {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
   border-radius: 0 0 15px 15px;
   box-shadow: var(--card-shadow);
@@ -145,7 +145,7 @@ body {
 }
 
 .header-full-width .row {
-  min-height: 70px;
+  min-height: 60px;
   align-items: center;
   position: relative;
   display: flex;
@@ -197,17 +197,20 @@ body {
   display: flex !important;
   justify-content: center;
   align-items: center;
+  height: auto;
+  min-height: 0;
 }
 
 .language-switcher-container-inline-header .btn-group {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .language-switcher-container-inline-header .btn {
-  padding: 6px 16px;
-  font-weight: 500;
+  padding: 4px 10px;
+  font-weight: 400;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
   border: none;
   background: rgba(255, 255, 255, 0.2);
