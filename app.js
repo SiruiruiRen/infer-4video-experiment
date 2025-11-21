@@ -81,7 +81,7 @@ const translations = {
         next_step: "Next Step:",
         pre_survey_instructions: "Complete the survey above, then click \"Continue to Dashboard\" below.",
         continue_to_dashboard: "Continue to Dashboard",
-        dashboard_title: "Video Dashboard",
+        dashboard_title: "INFER Dashboard",
         dashboard_welcome: "Welcome back, ",
         dashboard_welcome_new: "Welcome, ",
         your_progress: "Your Progress",
@@ -102,7 +102,7 @@ const translations = {
         video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below.",
         skip_survey: "Skip Survey",
         survey_optional: "(Optional)",
-        video_task_title: "Video Task",
+        video_task_title: "INFER Video Reflection Task",
         video_task_subtitle: "Analyze your teaching reflection and receive feedback",
         settings: "Settings",
         video_label: "Video:",
@@ -210,7 +210,7 @@ const translations = {
         next_step: "Nächster Schritt:",
         pre_survey_instructions: "Vervollständigen Sie die Umfrage oben und klicken Sie dann unten auf \"Weiter zum Dashboard\".",
         continue_to_dashboard: "Weiter zum Dashboard",
-        dashboard_title: "Video-Dashboard",
+        dashboard_title: "INFER Dashboard",
         dashboard_welcome: "Willkommen zurück, ",
         dashboard_welcome_new: "Willkommen, ",
         your_progress: "Ihr Fortschritt",
@@ -229,7 +229,7 @@ const translations = {
         video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten.",
         skip_survey: "Umfrage überspringen",
         survey_optional: "(Optional)",
-        video_task_title: "Video-Aufgabe",
+        video_task_title: "INFER Video-Reflexionsaufgabe",
         video_task_subtitle: "Analysieren Sie Ihre Unterrichtsreflexion und erhalten Sie Feedback",
         settings: "Einstellungen",
         video_label: "Video:",
@@ -649,10 +649,9 @@ function showPage(pageId) {
                 const titleEl = document.getElementById(ids.title);
                 const subtitleEl = document.getElementById(ids.subtitle);
                 if (titleEl) {
-                    const titleText = currentLanguage === 'en' 
-                        ? `Video ${videoNum} Task: ${video.name}`
-                        : `Video ${videoNum} Aufgabe: ${video.name}`;
-                    titleEl.textContent = titleText;
+                    // Use consistent INFER Video Reflection Task title
+                    titleEl.setAttribute('data-lang-key', 'video_task_title');
+                    titleEl.textContent = translations[currentLanguage].video_task_title;
                 }
                 if (subtitleEl) {
                     subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
@@ -929,7 +928,7 @@ function updatePreSurveyStatus() {
             badge.textContent = '✓ ' + (t.pre_survey_completed || 'Completed');
         } else {
             badge.className = 'badge bg-secondary d-block mb-2';
-            badge.textContent = (currentLanguage === 'en' ? 'Optional' : 'Optional');
+            badge.textContent = (currentLanguage === 'en' ? 'Not Completed' : 'Nicht abgeschlossen');
         }
     }
     
@@ -1193,10 +1192,9 @@ async function continueToReflectionTask(videoNum) {
     const videoNameEl = document.getElementById(ids.videoName);
     
     if (titleEl) {
-        const titleText = currentLanguage === 'en' 
-            ? `Video ${videoNum} Task: ${video.name}`
-            : `Video ${videoNum} Aufgabe: ${video.name}`;
-        titleEl.textContent = titleText;
+        // Use consistent INFER Video Reflection Task title
+        titleEl.setAttribute('data-lang-key', 'video_task_title');
+        titleEl.textContent = translations[currentLanguage].video_task_title;
     }
     if (subtitleEl) {
         subtitleEl.setAttribute('data-lang-key', 'video_task_subtitle');
@@ -2350,12 +2348,11 @@ function switchLanguage(lang) {
             const ids = getVideoElementIds(videoNum);
             const titleEl = document.getElementById(ids.title);
             const subtitleEl = document.getElementById(ids.subtitle);
-            if (titleEl) {
-                const titleText = currentLanguage === 'en' 
-                    ? `Video ${videoNum} Task: ${video.name}`
-                    : `Video ${videoNum} Aufgabe: ${video.name}`;
-                titleEl.textContent = titleText;
-            }
+                if (titleEl) {
+                    // Use consistent INFER Video Reflection Task title
+                    titleEl.setAttribute('data-lang-key', 'video_task_title');
+                    titleEl.textContent = translations[currentLanguage].video_task_title;
+                }
             if (subtitleEl) {
                 subtitleEl.textContent = translations[currentLanguage].video_task_subtitle;
             }
