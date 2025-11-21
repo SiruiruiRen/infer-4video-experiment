@@ -83,6 +83,7 @@ const translations = {
         continue_to_dashboard: "Continue to Dashboard",
         dashboard_title: "Video Dashboard",
         dashboard_welcome: "Welcome back, ",
+        dashboard_welcome_new: "Welcome, ",
         your_progress: "Your Progress",
         videos_completed: "0/4 Videos Completed",
         time_limit: "You have 2.5 weeks to complete all 4 videos",
@@ -91,6 +92,16 @@ const translations = {
         start_post_survey: "Start Post-Survey",
         view_pre_survey: "View",
         start_pre_survey: "Start Now",
+        video_link_title: "Video Link",
+        video_link_subtitle: "Access the teaching video",
+        video_link_label: "Video Link:",
+        video_password_label: "Password (if required):",
+        check_and_continue: "Check",
+        open_video_link: "Open Video",
+        finished_watching: "I Finished Watching the Video",
+        video_watch_instructions: "Please click \"Open Video\" above to watch the video in a new tab. After you finish watching, return here and click the button below.",
+        skip_survey: "Skip Survey",
+        survey_optional: "(Optional)",
         video_task_title: "Video Task",
         video_task_subtitle: "Analyze your teaching reflection and receive feedback",
         settings: "Settings",
@@ -166,11 +177,16 @@ const translations = {
         welcome_to_infer: "Welcome to INFER",
         welcome_message: "Thank you for participating in this study on AI-supported teaching reflection. Over the next 2.5 weeks, you will analyze 4 teaching videos using our INFER system.",
         browser_recommendation: "For the best experience, we recommend using <strong>Google Chrome</strong>.",
-        data_consent_header: "Data Protection Consent",
-        data_consent_intro: "To use this tool, we need to store your reflection responses and feedback interactions anonymously. Additionally, you may be asked to complete optional surveys about your experience. Survey responses are separate from tool usage data and are used for research purposes. You can use the tool regardless of your survey participation choice.",
-        data_consent_agree: "I agree to participate in the optional research surveys.",
-        data_consent_disagree: "I prefer not to participate in the optional research surveys (I can still use the tool).",
-        consent_disagreement_message: "You can still use the tool. Surveys will be optional and you can skip them.",
+        data_protection_header: "Data Protection Information",
+        data_protection_intro: "Please read the data protection information document below.",
+        open_data_protection_doc: "Open Data Protection Document",
+        data_protection_checkbox: "I have read and understood the data protection information document.",
+        data_consent_header: "Consent for Scientific Use",
+        data_consent_intro: "Please read the consent form below and indicate whether you consent to the use of your anonymized data for scientific purposes.",
+        open_consent_form: "Open Consent Form",
+        data_consent_agree: "I agree to the use of my anonymized data for scientific purposes.",
+        data_consent_disagree: "I do not agree to the use of my anonymized data for scientific purposes.",
+        consent_disagreement_message: "You can still participate in the experiment. However, only data from participants who gave consent will be used for scientific purposes.",
         loading_messages: [
             "Please wait while the little elves create your feedback...",
             "Almost there, we promise...",
@@ -196,12 +212,23 @@ const translations = {
         continue_to_dashboard: "Weiter zum Dashboard",
         dashboard_title: "Video-Dashboard",
         dashboard_welcome: "Willkommen zurück, ",
+        dashboard_welcome_new: "Willkommen, ",
         your_progress: "Ihr Fortschritt",
         videos_completed: "0/4 Videos abgeschlossen",
         time_limit: "Sie haben 2,5 Wochen Zeit, um alle 4 Videos zu vervollständigen",
         all_videos_completed: "Alle Videos abgeschlossen!",
         final_survey_prompt: "Bitte vervollständigen Sie die abschließende Nach-Umfrage, um das Experiment abzuschließen.",
         start_post_survey: "Nach-Umfrage starten",
+        video_link_title: "Video-Link",
+        video_link_subtitle: "Zugriff auf das Unterrichtsvideo",
+        video_link_label: "Video-Link:",
+        video_password_label: "Passwort (falls erforderlich):",
+        check_and_continue: "Prüfen",
+        open_video_link: "Video öffnen",
+        finished_watching: "Ich habe das Video angeschaut",
+        video_watch_instructions: "Bitte klicken Sie oben auf \"Video öffnen\", um das Video in einem neuen Tab anzusehen. Nachdem Sie das Video angeschaut haben, kehren Sie hierher zurück und klicken Sie auf die Schaltfläche unten.",
+        skip_survey: "Umfrage überspringen",
+        survey_optional: "(Optional)",
         video_task_title: "Video-Aufgabe",
         video_task_subtitle: "Analysieren Sie Ihre Unterrichtsreflexion und erhalten Sie Feedback",
         settings: "Einstellungen",
@@ -252,11 +279,16 @@ const translations = {
         continue_video: "Fortsetzen",
         survey_completed: "Umfrage erledigt",
         complete_presurvey_first: "Zuerst Vor-Umfrage abschließen",
-        data_consent_header: "Einverständniserklärung Datenschutz",
-        data_consent_intro: "Um dieses Tool zu nutzen, müssen wir Ihre Reflexionsantworten und Feedback-Interaktionen anonym speichern. Zusätzlich können Sie optional Umfragen zu Ihren Erfahrungen ausfüllen. Umfrageantworten sind getrennt von den Tool-Nutzungsdaten und werden für Forschungszwecke verwendet. Sie können das Tool unabhängig von Ihrer Umfrage-Teilnahme nutzen.",
-        data_consent_agree: "Ich stimme zu, an den optionalen Forschungs-Umfragen teilzunehmen.",
-        data_consent_disagree: "Ich möchte nicht an den optionalen Forschungs-Umfragen teilnehmen (ich kann das Tool trotzdem nutzen).",
-        consent_disagreement_message: "Sie können das Tool trotzdem nutzen. Die Umfragen sind optional und können übersprungen werden.",
+        data_protection_header: "Datenschutzinformationen",
+        data_protection_intro: "Bitte lesen Sie das unten stehende Datenschutzdokument.",
+        open_data_protection_doc: "Datenschutzdokument öffnen",
+        data_protection_checkbox: "Ich habe die Datenschutzinformationen gelesen und verstanden.",
+        data_consent_header: "Einverständnis zur wissenschaftlichen Nutzung",
+        data_consent_intro: "Bitte lesen Sie das unten stehende Einverständnisformular und geben Sie an, ob Sie der Verwendung Ihrer anonymisierten Daten für wissenschaftliche Zwecke zustimmen.",
+        open_consent_form: "Einverständnisformular öffnen",
+        data_consent_agree: "Ich stimme der Verwendung meiner anonymisierten Daten für wissenschaftliche Zwecke zu.",
+        data_consent_disagree: "Ich stimme der Verwendung meiner anonymisierten Daten für wissenschaftliche Zwecke nicht zu.",
+        consent_disagreement_message: "Sie können trotzdem am Experiment teilnehmen. Allerdings werden nur Daten von Teilnehmern verwendet, die zugestimmt haben.",
         welcome_to_infer: "Willkommen zu INFER",
         welcome_message: "Vielen Dank für Ihre Teilnahme an dieser Studie zur KI-gestützten Unterrichtsreflexion. In den nächsten 2,5 Wochen werden Sie 4 Unterrichtsvideos mit unserem INFER-System analysieren.",
         browser_recommendation: "Für die beste Erfahrung empfehlen wir die Verwendung von <strong>Google Chrome</strong>.",
@@ -328,55 +360,12 @@ function initializeApp() {
     });
 }
 
-// Validate consent
-function validateConsent() {
-    const agreeRadio = document.getElementById('data-consent-agree');
-    const disagreeRadio = document.getElementById('data-consent-disagree');
-    const continueBtn = document.getElementById('continue-to-login');
-    const disagreementMsg = document.getElementById('consent-disagreement-message');
-    
-    // Allow proceeding regardless of consent choice
-    if (agreeRadio && agreeRadio.checked) {
-        if (continueBtn) continueBtn.disabled = false;
-        if (disagreementMsg) disagreementMsg.classList.add('d-none');
-    } else if (disagreeRadio && disagreeRadio.checked) {
-        // Allow proceeding even if they disagree - they can still use the tool
-        if (continueBtn) continueBtn.disabled = false;
-        if (disagreementMsg) disagreementMsg.classList.remove('d-none');
-    }
-    
-    // Log consent interaction
-    logEvent('consent_interaction', {
-        consent_given: agreeRadio?.checked || false,
-        language: currentLanguage
-    });
-}
-
-// Handle consent continue
-function handleConsentContinue() {
-    const agreeRadio = document.getElementById('data-consent-agree');
-    const disagreeRadio = document.getElementById('data-consent-disagree');
-    
-    // Log consent choice (or lack thereof)
-    if (agreeRadio && agreeRadio.checked) {
-        logEvent('consent_accepted', {
-            language: currentLanguage,
-            timestamp: new Date().toISOString()
-        });
-    } else if (disagreeRadio && disagreeRadio.checked) {
-        logEvent('consent_declined', {
-            language: currentLanguage,
-            timestamp: new Date().toISOString()
-        });
-    }
-    
-    // Allow proceeding regardless of choice
-    showPage('login');
-}
-
 // Setup event listeners
 function setupEventListeners() {
     // Welcome/Consent page
+    // Data protection checkbox (mandatory)
+    document.getElementById('data-protection-read')?.addEventListener('change', validateConsent);
+    // Consent radio buttons (mandatory choice)
     document.getElementById('data-consent-agree')?.addEventListener('change', validateConsent);
     document.getElementById('data-consent-disagree')?.addEventListener('change', validateConsent);
     document.getElementById('continue-to-login')?.addEventListener('click', handleConsentContinue);
@@ -451,7 +440,7 @@ function setupEventListeners() {
         startFeedbackViewing('short', currentLanguage);
     });
     
-    // Post-video survey
+    // Post-video survey (legacy - kept for compatibility, but individual handlers are added below)
     document.getElementById('continue-after-post-video-survey')?.addEventListener('click', () => {
         markVideoSurveyComplete();
         showPage('dashboard');
@@ -487,6 +476,54 @@ function setupEventListeners() {
         showPage('thankyou');
     });
     
+    // Skip final survey
+    document.getElementById('skip-final-survey')?.addEventListener('click', () => {
+        markPostSurveyComplete();
+        showPage('thankyou');
+    });
+    
+    // Video link page check buttons (4 videos)
+    for (let i = 1; i <= 4; i++) {
+        // "Finished watching" button - proceed to reflection
+        document.getElementById(`video-link-${i}-check-btn`)?.addEventListener('click', () => {
+            logEvent('video_watched_confirmed', {
+                video_id: `video${i}`,
+                participant_name: currentParticipant
+            });
+            continueToReflectionTask(i);
+        });
+        
+        // "Open Video" link button - opens video in new tab
+        document.getElementById(`video-link-${i}-open-btn`)?.addEventListener('click', (e) => {
+            const videoId = `video${i}`;
+            const video = VIDEOS.find(v => v.id === videoId);
+            if (video && video.link) {
+                logEvent('video_link_opened', {
+                    video_id: videoId,
+                    participant_name: currentParticipant,
+                    video_url: video.link
+                });
+                // Link will open in new tab via target="_blank"
+            } else {
+                e.preventDefault();
+                showAlert('Video link not available yet.', 'warning');
+            }
+        });
+    }
+    
+    // Post-video survey continue buttons (4 videos)
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`continue-after-post-video-survey-${i}`)?.addEventListener('click', () => {
+            showPage('dashboard');
+            renderDashboard();
+        });
+        
+        document.getElementById(`skip-post-video-survey-${i}`)?.addEventListener('click', () => {
+            showPage('dashboard');
+            renderDashboard();
+        });
+    }
+    
     // Tab switching detection
     document.addEventListener('visibilitychange', handleTabSwitch);
 }
@@ -516,7 +553,11 @@ function handleTabSwitch() {
             timestamp: new Date().toISOString()
         });
         
-        if (timeAway > 5 && currentPage === 'video-task' && !hasAskedAboutAI) {
+        // Check if on any video task page (video-1, video-2, video-3, video-4)
+        // Exclude video link pages and survey pages
+        const isOnVideoTaskPage = currentPage && currentPage.match(/^video-[1-4]$/);
+        
+        if (timeAway > 5 && isOnVideoTaskPage && !hasAskedAboutAI) {
             hasAskedAboutAI = true;
             showAIUsageModal();
         }
@@ -735,6 +776,12 @@ async function handleLogin() {
             assigned_condition: condition
         });
         
+        // Hide resume message for new users
+        const resumeInfo = document.getElementById('resume-info');
+        if (resumeInfo) {
+            resumeInfo.classList.add('d-none');
+        }
+        
         // Show dashboard first - don't auto-navigate to pre-survey
         setTimeout(() => {
             showPage('dashboard');
@@ -757,9 +804,9 @@ async function loadParticipantProgress(participantName) {
             .from('participant_progress')
             .select('*')
             .eq('participant_name', participantName)
-            .single();
+            .maybeSingle(); // Use maybeSingle() to handle empty results gracefully
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+        if (error) {
             console.error('Error loading progress:', error);
             return null;
         }
@@ -809,9 +856,24 @@ function renderDashboard() {
     const welcomeText = document.getElementById('dashboard-welcome-text');
     const nameEl = document.getElementById('dashboard-participant-name');
     if (welcomeText && nameEl) {
+        // Check if this is a returning user (has any progress)
+        const isReturningUser = currentParticipantProgress && (
+            (currentParticipantProgress.videos_completed && currentParticipantProgress.videos_completed.length > 0) ||
+            currentParticipantProgress.pre_survey_completed ||
+            currentParticipantProgress.post_survey_completed ||
+            (currentParticipantProgress.video_surveys && Object.keys(currentParticipantProgress.video_surveys).length > 0)
+        );
+        
         if (currentParticipant) {
-            welcomeText.textContent = translations[currentLanguage].dashboard_welcome;
-            nameEl.textContent = ` ${currentParticipant}`;
+            if (isReturningUser) {
+                // Returning user - show "Welcome back"
+                welcomeText.textContent = translations[currentLanguage].dashboard_welcome;
+                nameEl.textContent = ` ${currentParticipant}`;
+            } else {
+                // New user - just show "Welcome"
+                welcomeText.textContent = translations[currentLanguage].dashboard_welcome_new || 'Welcome';
+                nameEl.textContent = ` ${currentParticipant}`;
+            }
             nameEl.style.fontWeight = '600';
         } else {
             welcomeText.textContent = translations[currentLanguage].dashboard_welcome.replace(',', '');
@@ -866,8 +928,8 @@ function updatePreSurveyStatus() {
             badge.className = 'badge bg-success d-block mb-2';
             badge.textContent = '✓ ' + (t.pre_survey_completed || 'Completed');
         } else {
-            badge.className = 'badge bg-danger d-block mb-2';
-            badge.textContent = '⚠ ' + (currentLanguage === 'en' ? 'Required' : 'Erforderlich');
+            badge.className = 'badge bg-secondary d-block mb-2';
+            badge.textContent = (currentLanguage === 'en' ? 'Optional' : 'Optional');
         }
     }
     
@@ -1068,7 +1130,7 @@ function setupVideoPageElements(videoNum) {
     }
 }
 
-// Start video task
+// Start video task - now goes to video link page first
 async function startVideoTask(videoId) {
     // Pre-survey is now optional - allow access to videos without completing it
     // No blocking check needed
@@ -1079,6 +1141,49 @@ async function startVideoTask(videoId) {
     if (!video) return;
     
     const videoNum = getVideoPageNumber(videoId);
+    
+    // Update video link page with video info
+    const linkPageSubtitle = document.getElementById(`video-link-${videoNum}-subtitle`);
+    const linkPageName = document.getElementById(`video-link-${videoNum}-name`);
+    const linkPageUrl = document.getElementById(`video-link-${videoNum}-url`);
+    const linkPagePassword = document.getElementById(`video-link-${videoNum}-password`);
+    const linkPageOpenBtn = document.getElementById(`video-link-${videoNum}-open-btn`);
+    
+    if (linkPageSubtitle) {
+        linkPageSubtitle.setAttribute('data-lang-key', 'video_link_subtitle');
+    }
+    if (linkPageName) {
+        linkPageName.textContent = video.name;
+    }
+    if (linkPageUrl) {
+        linkPageUrl.value = video.link || '';
+    }
+    if (linkPagePassword) {
+        linkPagePassword.value = video.password || '';
+    }
+    if (linkPageOpenBtn && video.link) {
+        linkPageOpenBtn.href = video.link;
+    }
+    
+    // Show video link page first
+    const videoLinkPageId = `video-link-${videoNum}`;
+    console.log(`Navigating to video link page: ${videoLinkPageId} for video ${videoId}`);
+    showPage(videoLinkPageId);
+    
+    logEvent('video_link_page_viewed', {
+        video_id: videoId,
+        participant_name: currentParticipant
+    });
+}
+
+// Continue from video link page to reflection task
+async function continueToReflectionTask(videoNum) {
+    const videoId = `video${videoNum}`;
+    const video = VIDEOS.find(v => v.id === videoId);
+    
+    if (!video) return;
+    
+    currentVideoId = videoId;
     const ids = getVideoElementIds(videoNum);
     
     // Update task page with video info
@@ -1135,9 +1240,9 @@ async function loadPreviousReflectionAndFeedbackForVideo(videoId, videoNum) {
             .eq('video_id', videoId)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle(); // Use maybeSingle() instead of single() to handle empty results gracefully
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+        if (error) {
             console.error('Error loading previous reflection:', error);
             resetTaskStateForVideo(videoNum);
             return;
@@ -1238,9 +1343,9 @@ async function loadPreviousReflectionAndFeedback(videoId) {
             .eq('video_id', videoId)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle(); // Use maybeSingle() to handle empty results gracefully
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+        if (error) {
             console.error('Error loading previous reflection:', error);
             resetTaskState();
             return;
@@ -1335,6 +1440,9 @@ function resetTaskStateForVideo(videoNum) {
         currentFeedbackStartTime: null
     };
     
+    // Reset AI usage flag for new video task
+    hasAskedAboutAI = false;
+    
     const ids = getVideoElementIds(videoNum);
     
     // Clear reflection text
@@ -1405,13 +1513,11 @@ function loadSurvey(surveyType) {
     } else if (surveyType.startsWith('post_video_')) {
         const videoNum = surveyType.split('_')[2];
         surveyUrl = QUALTRICS_SURVEYS[`post_video_${videoNum}`];
-        document.getElementById('post-video-survey-iframe').src = surveyUrl;
-        
-        // Update title
-        const titleEl = document.getElementById('post-video-survey-title');
-        const subtitleEl = document.getElementById('post-video-survey-subtitle');
-        if (titleEl) titleEl.textContent = `Post-Video ${videoNum} Questionnaire`;
-        if (subtitleEl) subtitleEl.textContent = `Please share your thoughts about Video ${videoNum}`;
+        const iframeId = `post-video-survey-${videoNum}-iframe`;
+        const iframe = document.getElementById(iframeId);
+        if (iframe) {
+            iframe.src = surveyUrl;
+        }
     }
 }
 
@@ -1587,6 +1693,209 @@ async function handleGenerateFeedback() {
         const videoId = currentVideoPage.dataset.videoId;
         const videoNum = getVideoPageNumber(videoId);
         handleGenerateFeedbackForVideo(videoNum);
+    }
+}
+
+// Generate feedback for specific video page
+async function generateFeedbackForVideo(reflection, videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const loadingSpinner = document.getElementById(ids.loadingSpinner);
+    const generateBtn = document.getElementById(ids.generateBtn);
+    
+    // Show loading
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (generateBtn) generateBtn.disabled = true;
+    
+    // Rotate loading messages
+    const loadingText = document.getElementById(ids.loadingText);
+    let loadingMessageIndex = 0;
+    const loadingInterval = setInterval(() => {
+        loadingMessageIndex = (loadingMessageIndex + 1) % translations[currentLanguage].loading_messages.length;
+        if (loadingText) {
+            loadingText.textContent = translations[currentLanguage].loading_messages[loadingMessageIndex];
+        }
+    }, 8000);
+    
+    try {
+        // Step 0: Check for duplicate reflection
+        const previousReflection = sessionStorage.getItem(`reflection-${currentVideoId}`);
+        if (previousReflection && previousReflection.trim() === reflection.trim()) {
+            const duplicateMessage = currentLanguage === 'en'
+                ? "⚠️ You submitted the same reflection as before. Please revise your reflection to improve it based on the previous feedback, then generate new feedback."
+                : "⚠️ Sie haben dieselbe Reflexion wie zuvor eingereicht. Bitte überarbeiten Sie Ihre Reflexion, um sie basierend auf dem vorherigen Feedback zu verbessern, und generieren Sie dann neues Feedback.";
+            
+            logEvent('duplicate_reflection_detected', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                reflection_length: reflection.length,
+                revision_count: currentTaskState.revisionCount || 0
+            });
+            
+            clearInterval(loadingInterval);
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (generateBtn) generateBtn.disabled = false;
+            
+            showAlert(duplicateMessage, 'warning');
+            return;
+        }
+        
+        // Step 0.5: Check for very short or non-relevant reflection
+        const wordCount = reflection.split(/\s+/).length;
+        const isVeryShort = wordCount < 20;
+        
+        // Step 1: Analyze reflection (binary classification at window level, then aggregated)
+        const analysisResult = await analyzeReflectionDistribution(reflection, currentLanguage);
+        
+        // Store binary classification results (window-level D/E/P scores)
+        await storeBinaryClassificationResults(analysisResult);
+        
+        // Step 2: Check for non-meaningful input (short OR non-relevant)
+        const isNonRelevant = analysisResult.percentages_priority.professional_vision < 10;
+        
+        if (isVeryShort || isNonRelevant) {
+            displayAnalysisDistributionForVideo(analysisResult, videoNum);
+            
+            let warningMessage = '';
+            if (isVeryShort && isNonRelevant) {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection is very short and does not relate to the teaching video. Please write a longer reflection (at least 50 words) that describes what you observed, explains why it happened using educational theories, and predicts the effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz und bezieht sich nicht auf das Unterrichtsvideo. Bitte schreiben Sie eine längere Reflexion (mindestens 50 Wörter), die beschreibt, was Sie beobachtet haben, erklärt, warum es passiert ist (unter Verwendung pädagogischer Theorien), und die Auswirkungen auf das Lernen der Schüler vorhersagt.";
+            } else if (isVeryShort) {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection is very short (only " + wordCount + " words). Please expand your reflection to at least 50 words, providing more detail about what you observed, why it happened, and its effects on student learning."
+                    : "⚠️ Ihre Reflexion ist sehr kurz (nur " + wordCount + " Wörter). Bitte erweitern Sie Ihre Reflexion auf mindestens 50 Wörter und geben Sie mehr Details zu dem, was Sie beobachtet haben, warum es passiert ist und welche Auswirkungen es auf das Lernen der Schüler hat.";
+            } else {
+                warningMessage = currentLanguage === 'en'
+                    ? "⚠️ Your reflection does not relate to the teaching video you watched. Please revise your reflection to focus on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                    : "⚠️ Ihre Reflexion bezieht sich nicht auf das Unterrichtsvideo, das Sie sich angeschaut haben. Bitte überarbeiten Sie Ihre Reflexion, um sich auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
+            }
+            
+            logEvent('non_relevant_reflection_detected', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                reflection_length: reflection.length,
+                word_count: wordCount,
+                professional_vision_percentage: analysisResult.percentages_priority.professional_vision,
+                is_very_short: isVeryShort,
+                is_non_relevant: isNonRelevant
+            });
+            
+            const feedbackExtended = document.getElementById(ids.feedbackExtended);
+            const feedbackShort = document.getElementById(ids.feedbackShort);
+            if (feedbackExtended) feedbackExtended.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${warningMessage}</div>`;
+            if (feedbackShort) feedbackShort.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>${warningMessage}</div>`;
+            
+            const feedbackTabs = document.getElementById(ids.feedbackTabs);
+            if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+            
+            clearInterval(loadingInterval);
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (generateBtn) generateBtn.disabled = false;
+            return;
+        }
+        
+        // Step 3: Display analysis distribution
+        displayAnalysisDistributionForVideo(analysisResult, videoNum);
+        
+        // Step 4: Generate both feedback styles
+        const [extendedFeedback, shortFeedback] = await Promise.all([
+            generateWeightedFeedback(reflection, currentLanguage, 'academic', analysisResult),
+            generateWeightedFeedback(reflection, currentLanguage, 'user-friendly', analysisResult)
+        ]);
+        
+        // Step 5: Add revision suggestion if needed (for non-relevant content)
+        let finalShortFeedback = shortFeedback;
+        let finalExtendedFeedback = extendedFeedback;
+        
+        // Add warning if significant non-relevant content
+        if (analysisResult && analysisResult.percentages_priority.other > 50) {
+            const revisionNote = currentLanguage === 'en' 
+                ? "\n\n**⚠️ Important Note:** Your reflection contains a significant amount of content that doesn't follow professional lesson analysis steps. Please revise your reflection to focus more on describing what you observed, explaining why it happened using educational theories, and predicting the effects on student learning."
+                : "\n\n**⚠️ Wichtiger Hinweis:** Ihre Reflexion enthält einen erheblichen Anteil an Inhalten, die nicht den Schritten einer professionellen Stundenanalyse folgen. Bitte überarbeiten Sie Ihre Reflexion, um sich mehr auf die Beschreibung Ihrer Beobachtungen, die Erklärung mit Hilfe pädagogischer Theorien und die Vorhersage der Auswirkungen auf das Lernen der Schüler zu konzentrieren.";
+            finalShortFeedback += revisionNote;
+            finalExtendedFeedback += revisionNote;
+            
+            logEvent('non_relevant_content_warning', {
+                participant_name: currentParticipant,
+                video_id: currentVideoId,
+                language: currentLanguage,
+                other_percentage: analysisResult.percentages_priority.other,
+                professional_vision_percentage: analysisResult.percentages_priority.professional_vision
+            });
+        }
+        
+        // Add warning if professional vision is low but above threshold
+        if (analysisResult && analysisResult.percentages_priority.professional_vision < 30 && analysisResult.percentages_priority.professional_vision >= 10) {
+            const lowPVNote = currentLanguage === 'en'
+                ? "\n\n**Note:** Your reflection shows limited connection to professional vision concepts. Try to include more descriptions of observable teaching events, explanations linking events to educational theories, and predictions about effects on student learning."
+                : "\n\n**Hinweis:** Ihre Reflexion zeigt eine begrenzte Verbindung zu Professional-Vision-Konzepten. Versuchen Sie, mehr Beschreibungen beobachtbarer Unterrichtsereignisse, Erklärungen, die Ereignisse mit pädagogischen Theorien verknüpfen, und Vorhersagen über Auswirkungen auf das Lernen der Schüler einzubeziehen.";
+            finalShortFeedback += lowPVNote;
+            finalExtendedFeedback += lowPVNote;
+        }
+        
+        // Step 6: Save to database
+        await saveFeedbackToDatabase({
+            participantCode: currentParticipant,
+            videoSelected: currentVideoId,
+            reflectionText: reflection,
+            analysisResult,
+            extendedFeedback: finalExtendedFeedback,
+            shortFeedback: finalShortFeedback
+        });
+        
+        // Step 7: Store reflection for duplicate detection
+        sessionStorage.setItem(`reflection-${currentVideoId}`, reflection.trim());
+        
+        // Step 8: Display feedback
+        const feedbackExtended = document.getElementById(ids.feedbackExtended);
+        const feedbackShort = document.getElementById(ids.feedbackShort);
+        if (feedbackExtended) feedbackExtended.innerHTML = formatStructuredFeedback(finalExtendedFeedback, analysisResult);
+        if (feedbackShort) feedbackShort.innerHTML = formatStructuredFeedback(finalShortFeedback, analysisResult);
+        
+        // Step 9: Show tabs
+        const feedbackTabs = document.getElementById(ids.feedbackTabs);
+        if (feedbackTabs) feedbackTabs.classList.remove('d-none');
+        
+        if (userPreferredFeedbackStyle === 'short') {
+            document.getElementById(ids.shortTab)?.click();
+        } else {
+            document.getElementById(ids.extendedTab)?.click();
+        }
+        
+        // Start feedback viewing tracking
+        startFeedbackViewing(userPreferredFeedbackStyle, currentLanguage);
+        
+        // Step 10: Show revise and submit buttons
+        const reviseBtn = document.getElementById(ids.reviseBtn);
+        const submitBtn = document.getElementById(ids.submitBtn);
+        if (reviseBtn) reviseBtn.style.display = 'inline-block';
+        if (submitBtn) submitBtn.style.display = 'block';
+        
+        currentTaskState.feedbackGenerated = true;
+        
+        // Log successful feedback generation
+        logEvent('feedback_generated_successfully', {
+            participant_name: currentParticipant,
+            video_id: currentVideoId,
+            language: currentLanguage,
+            reflection_length: reflection.length,
+            word_count: wordCount,
+            professional_vision_percentage: analysisResult.percentages_priority.professional_vision,
+            other_percentage: analysisResult.percentages_priority.other,
+            revision_count: currentTaskState.revisionCount || 0
+        });
+        
+        showAlert('✅ Feedback generated successfully!', 'success');
+        
+    } catch (error) {
+        console.error('Error generating feedback:', error);
+        showAlert(`⚠️ ${error.message}`, 'danger');
+    } finally {
+        clearInterval(loadingInterval);
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (generateBtn) generateBtn.disabled = false;
     }
 }
 
@@ -1793,6 +2102,50 @@ async function generateFeedback(reflection) {
 }
 
 // Display analysis distribution
+// Display analysis distribution for specific video page
+function displayAnalysisDistributionForVideo(analysisResult, videoNum) {
+    const ids = getVideoElementIds(videoNum);
+    const rawPercentages = analysisResult.percentages_raw || analysisResult.percentages;
+    const isGerman = currentLanguage === 'de';
+    
+    // Create or update distribution container
+    const containerId = `analysis-distribution-video-${videoNum}`;
+    let container = document.getElementById(containerId);
+    if (!container) {
+        container = document.createElement('div');
+        container.id = containerId;
+        container.className = 'analysis-distribution-professional mb-3';
+        const feedbackTabs = document.getElementById(ids.feedbackTabs);
+        if (feedbackTabs) {
+            feedbackTabs.parentNode.insertBefore(container, feedbackTabs);
+        }
+    }
+    
+    if (rawPercentages.professional_vision <= 5) {
+        container.innerHTML = `
+            <div class="professional-analysis-summary">
+                <h6>${isGerman ? 'Analyse Ihrer Reflexion' : 'Analysis of Your Reflection'}</h6>
+                <p class="analysis-text text-warning">
+                    ${isGerman ? 'Ihr Text bezieht sich nicht auf Professional Vision. Überarbeiten Sie ihn, um ihn auf das Video zu beziehen.' 
+                              : 'Your text does not relate to professional vision. Revise to relate to the video.'}
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="professional-analysis-summary">
+            <h6>${isGerman ? 'Analyse Ihrer Reflexion' : 'Analysis of Your Reflection'}</h6>
+            <p class="analysis-text">
+                ${isGerman 
+                    ? `Ihre Reflexion enthält ${rawPercentages.description || 0}% Beschreibung, ${rawPercentages.explanation || 0}% Erklärung und ${rawPercentages.prediction || 0}% Vorhersage.` 
+                    : `Your reflection contains ${rawPercentages.description || 0}% description, ${rawPercentages.explanation || 0}% explanation, and ${rawPercentages.prediction || 0}% prediction.`}
+            </p>
+        </div>
+    `;
+}
+
 function displayAnalysisDistribution(analysisResult) {
     const rawPercentages = analysisResult.percentages_raw || analysisResult.percentages;
     const isGerman = currentLanguage === 'de';
@@ -1889,6 +2242,18 @@ function handleFinalSubmission() {
     }
 }
 
+function handleFinalSubmissionForVideo(videoNum) {
+    const modal = document.getElementById('final-submission-modal');
+    if (modal) {
+        modal.dataset.videoNum = videoNum;
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    } else {
+        // If modal doesn't exist, directly confirm
+        confirmFinalSubmissionForVideo(videoNum);
+    }
+}
+
 function confirmFinalSubmission() {
     const currentVideoPage = document.querySelector('.video-task-page:not(.d-none)');
     if (currentVideoPage) {
@@ -1896,6 +2261,32 @@ function confirmFinalSubmission() {
         const videoNum = getVideoPageNumber(videoId);
         confirmFinalSubmissionForVideo(videoNum);
     }
+}
+
+function confirmFinalSubmissionForVideo(videoNum) {
+    const videoId = `video${videoNum}`;
+    const ids = getVideoElementIds(videoNum);
+    
+    // Mark video as completed
+    markVideoCompleted();
+    
+    // Log final submission
+    logEvent('final_submission', {
+        video_id: videoId,
+        participant_name: currentParticipant,
+        language: currentLanguage,
+        reflection_id: currentTaskState.currentReflectionId,
+        total_revisions: currentTaskState.revisionCount || 1,
+        final_reflection_length: document.getElementById(ids.reflectionText)?.value.length || 0
+    });
+    
+    showAlert('✅ Final reflection submitted successfully!', 'success');
+    
+    // Navigate to post-survey page for this video
+    setTimeout(() => {
+        showPage(`post-video-survey-${videoNum}`);
+        loadSurvey(`post_video_${videoNum}`);
+    }, 1500);
 }
 
 // Mark video as completed
@@ -2263,33 +2654,65 @@ TEXT: ${windowText}`;
 }
 
 async function classifyExplanation(windowText) {
-    const prompt = `You are an expert in analyzing teaching reflections. Determine if this text contains explanations that connect teaching events to educational theories.
+    const prompt = `Task: Identify whether the following text belongs to the category "Explanation of Relevant Classroom Events."
 
-DEFINITION: Explanations relate observable teaching events to theories of effective teaching, focusing on WHY events occur.
+Core Principle: An explanation connects observable classroom events with reasons WHY they occurred or WHY they matter for teaching and learning.
 
-CRITERIA FOR "1" (Contains Explanation):
-- Links observable teaching events to educational knowledge
-- References learning theories, teaching principles, or pedagogical concepts
-- Explains WHY a teaching action was used or effective
-- Examples: "Open questions activate students cognitively", "Rules prevent disruptions"
-- Must be relevant to teaching/learning context
+Key Question: Does the text explain WHY something happened in the classroom that relates to teaching or learning processes?
 
-CRITERIA FOR "0" (No Explanation):
-- No connection to educational theories or principles
-- Explains non-observable or hypothetical events
-- No reference to teaching/learning events
-- Pure description without theoretical connection
-- Non-relevant content unrelated to teaching
-- Too short or meaningless fragments
+Code as "1" (Explanation) when the text contains:
+* An observable classroom event (what teacher/students actually did)
+* PLUS a reason WHY it happened or WHY it affects learning
+* Even basic pedagogical reasoning counts
+* Partial explanations are sufficient - if ANY part explains, code as "1"
 
-INSTRUCTIONS:
-- Respond with ONLY "1" or "0"
-- No explanations, quotes, or other text
-- "1" if ANY part connects teaching events to educational knowledge
-- "0" if no theoretical connections present OR if content is non-relevant
-- Be conservative: only respond "1" if clearly certain
+Be INCLUSIVE - Accept these as explanations:
+* Simple cause-effect statements about classroom dynamics
+* Common-sense pedagogical reasoning without technical terms
+* Connections between teaching actions and student responses
+* Basic explanations of learning processes
+* Informal observations about why teaching methods work/don't work
 
-TEXT: ${windowText}`;
+Code as "0" (Non-Explanation) only when:
+* Text is purely descriptive with no causal reasoning
+* Discusses hypothetical/future actions ("should have," "would have")
+* Contains no WHY reasoning about actual classroom events
+* Lacks any connection to teaching/learning processes
+
+Positive Examples (Code as "1"):
+* "The students were engaged because the activity was hands-on"
+* "The teacher's open questions give students room for their own thoughts"
+* "Through repetition, students can better remember the conjugations"
+* "The unclear instructions confused the students"
+* "Students don't participate because the teacher doesn't give them enough time to think"
+* "Using role-play helps students remember vocabulary better"
+* "The teacher goes through the rows to ensure all students are working"
+* "By connecting to prior knowledge, learning becomes easier"
+* "The negative feedback could discourage future participation"
+* "Clear learning goals help students understand what's expected"
+
+Negative Examples (Code as "0"):
+* "The teacher writes the topic on the board"
+* "Students work on the worksheet"
+* "The classroom is noisy"
+* "The teacher should have given more time"
+* "I would have explained it differently"
+* "The students seem tired"
+* "Two newspaper articles are hanging on the board"
+* "The lesson continues with the next exercise"
+* "This happens in math class"
+* "The teacher is male and middle-aged"
+
+Remember:
+* Focus on finding ANY explanatory content about WHY classroom events occur
+* Don't require formal educational terminology
+* Accept partial explanations within longer texts
+* When uncertain, lean toward inclusion (code as "1")
+* Look for connections between events and their effects on teaching/learning
+
+Output only "1" or "0" without any additional text or quotation marks.
+
+Text to be evaluated: ${windowText}`;
 
     return await callBinaryClassifier(prompt);
 }
@@ -2352,11 +2775,18 @@ async function callBinaryClassifier(prompt) {
             });
             
             if (!response.ok) {
-                console.warn(`Binary classifier attempt ${attempt + 1} failed: HTTP ${response.status}`);
+                const errorText = await response.text().catch(() => 'Unknown error');
+                console.error(`Binary classifier attempt ${attempt + 1} failed: HTTP ${response.status}`, errorText);
+                console.error(`API URL: ${OPENAI_API_URL}`);
+                console.error(`Request data:`, JSON.stringify(requestData, null, 2));
                 continue;
             }
             
             const result = await response.json();
+            if (!result.choices || !result.choices[0]) {
+                console.error(`Binary classifier attempt ${attempt + 1}: Invalid response format`, result);
+                continue;
+            }
             const output = result.choices[0].message.content.trim();
             
             if (output === '1' || output === '0') {
@@ -2484,8 +2914,16 @@ async function generateWeightedFeedback(reflection, language, style, analysisRes
         });
         
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            const errorText = await response.text().catch(() => 'Unknown error');
+            let errorData = {};
+            try {
+                errorData = JSON.parse(errorText);
+            } catch (e) {
+                errorData = { error: { message: errorText } };
+            }
+            console.error(`Feedback generation failed: HTTP ${response.status}`, errorData);
+            console.error(`API URL: ${OPENAI_API_URL}`);
+            throw new Error(errorData.error?.message || `HTTP ${response.status}: ${errorText}`);
         }
         
         const result = await response.json();
