@@ -167,10 +167,10 @@ const translations = {
         welcome_message: "Thank you for participating in this study on AI-supported teaching reflection. Over the next 2.5 weeks, you will analyze 4 teaching videos using our INFER system.",
         browser_recommendation: "For the best experience, we recommend using <strong>Google Chrome</strong>.",
         data_consent_header: "Data Protection Consent",
-        data_consent_intro: "While processing the lesson analysis, your data will be stored anonymously. After the lesson analysis, you will be asked to answer a few short questions about your experience and how you found the tool. This data will also be stored anonymously. Your answers will help us to continuously improve the tool. Please agree to allow us to use your data for scientific purposes.",
-        data_consent_agree: "I agree to the use of the data for scientific purposes.",
-        data_consent_disagree: "I do not agree to the use of the data for scientific purposes.",
-        consent_disagreement_message: "Unfortunately, you cannot participate without consent to data use. Thank you for your interest.",
+        data_consent_intro: "To use this tool, we need to store your reflection responses and feedback interactions anonymously. Additionally, you may be asked to complete optional surveys about your experience. Survey responses are separate from tool usage data and are used for research purposes. You can use the tool regardless of your survey participation choice.",
+        data_consent_agree: "I agree to participate in the optional research surveys.",
+        data_consent_disagree: "I prefer not to participate in the optional research surveys (I can still use the tool).",
+        consent_disagreement_message: "You can still use the tool. Surveys will be optional and you can skip them.",
         loading_messages: [
             "Please wait while the little elves create your feedback...",
             "Almost there, we promise...",
@@ -253,10 +253,10 @@ const translations = {
         survey_completed: "Umfrage erledigt",
         complete_presurvey_first: "Zuerst Vor-Umfrage abschließen",
         data_consent_header: "Einverständniserklärung Datenschutz",
-        data_consent_intro: "Während der Bearbeitung der Unterrichtsanalyse werden ihre Daten anonymisiert gespeichert. Weiter werden sie nach der Unterrichtsanalyse gebeten, kurze Fragen zu ihren Erfahrungen und zum Umgang mit dem Tool auszufüllen. Auch diese Daten werden anonymisiert gespeichert. Ihre Antworten helfen uns das Tool stetig weiterzuentwickeln. Bitte stimmen sie zu, wenn wir ihre Daten dementsprechend für wissenschaftliche Zwecke nutzen dürfen.",
-        data_consent_agree: "Ich stimme der Nutzung der Daten für wissenschaftliche Zwecke zu.",
-        data_consent_disagree: "Ich stimme der Nutzung der Daten für wissenschaftliche Zwecke nicht zu.",
-        consent_disagreement_message: "Leider können Sie ohne Zustimmung zur Datennutzung nicht an der Studie teilnehmen. Vielen Dank für Ihr Interesse.",
+        data_consent_intro: "Um dieses Tool zu nutzen, müssen wir Ihre Reflexionsantworten und Feedback-Interaktionen anonym speichern. Zusätzlich können Sie optional Umfragen zu Ihren Erfahrungen ausfüllen. Umfrageantworten sind getrennt von den Tool-Nutzungsdaten und werden für Forschungszwecke verwendet. Sie können das Tool unabhängig von Ihrer Umfrage-Teilnahme nutzen.",
+        data_consent_agree: "Ich stimme zu, an den optionalen Forschungs-Umfragen teilzunehmen.",
+        data_consent_disagree: "Ich möchte nicht an den optionalen Forschungs-Umfragen teilnehmen (ich kann das Tool trotzdem nutzen).",
+        consent_disagreement_message: "Sie können das Tool trotzdem nutzen. Die Umfragen sind optional und können übersprungen werden.",
         welcome_to_infer: "Willkommen zu INFER",
         welcome_message: "Vielen Dank für Ihre Teilnahme an dieser Studie zur KI-gestützten Unterrichtsreflexion. In den nächsten 2,5 Wochen werden Sie 4 Unterrichtsvideos mit unserem INFER-System analysieren.",
         browser_recommendation: "Für die beste Erfahrung empfehlen wir die Verwendung von <strong>Google Chrome</strong>.",
@@ -335,11 +335,13 @@ function validateConsent() {
     const continueBtn = document.getElementById('continue-to-login');
     const disagreementMsg = document.getElementById('consent-disagreement-message');
     
+    // Allow proceeding regardless of consent choice
     if (agreeRadio && agreeRadio.checked) {
         if (continueBtn) continueBtn.disabled = false;
         if (disagreementMsg) disagreementMsg.classList.add('d-none');
     } else if (disagreeRadio && disagreeRadio.checked) {
-        if (continueBtn) continueBtn.disabled = true;
+        // Allow proceeding even if they disagree - they can still use the tool
+        if (continueBtn) continueBtn.disabled = false;
         if (disagreementMsg) disagreementMsg.classList.remove('d-none');
     }
     
@@ -353,13 +355,23 @@ function validateConsent() {
 // Handle consent continue
 function handleConsentContinue() {
     const agreeRadio = document.getElementById('data-consent-agree');
+    const disagreeRadio = document.getElementById('data-consent-disagree');
+    
+    // Log consent choice (or lack thereof)
     if (agreeRadio && agreeRadio.checked) {
         logEvent('consent_accepted', {
             language: currentLanguage,
             timestamp: new Date().toISOString()
         });
-        showPage('login');
+    } else if (disagreeRadio && disagreeRadio.checked) {
+        logEvent('consent_declined', {
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
     }
+    
+    // Allow proceeding regardless of choice
+    showPage('login');
 }
 
 // Setup event listeners
@@ -631,11 +643,13 @@ function validateConsent() {
     const continueBtn = document.getElementById('continue-to-login');
     const disagreementMsg = document.getElementById('consent-disagreement-message');
     
+    // Allow proceeding regardless of consent choice
     if (agreeRadio && agreeRadio.checked) {
         if (continueBtn) continueBtn.disabled = false;
         if (disagreementMsg) disagreementMsg.classList.add('d-none');
     } else if (disagreeRadio && disagreeRadio.checked) {
-        if (continueBtn) continueBtn.disabled = true;
+        // Allow proceeding even if they disagree - they can still use the tool
+        if (continueBtn) continueBtn.disabled = false;
         if (disagreementMsg) disagreementMsg.classList.remove('d-none');
     }
     
@@ -649,13 +663,23 @@ function validateConsent() {
 // Handle consent continue
 function handleConsentContinue() {
     const agreeRadio = document.getElementById('data-consent-agree');
+    const disagreeRadio = document.getElementById('data-consent-disagree');
+    
+    // Log consent choice (or lack thereof)
     if (agreeRadio && agreeRadio.checked) {
         logEvent('consent_accepted', {
             language: currentLanguage,
             timestamp: new Date().toISOString()
         });
-        showPage('login');
+    } else if (disagreeRadio && disagreeRadio.checked) {
+        logEvent('consent_declined', {
+            language: currentLanguage,
+            timestamp: new Date().toISOString()
+        });
     }
+    
+    // Allow proceeding regardless of choice
+    showPage('login');
 }
 
 // Login handler
@@ -909,8 +933,8 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
     const surveyText = t.survey_completed || (currentLanguage === 'en' ? 'Survey Done' : 'Umfrage erledigt');
     const preSurveyRequired = t.complete_presurvey_first || (currentLanguage === 'en' ? 'Complete Pre-Survey First' : 'Zuerst Vor-Umfrage abschließen');
     
-    // Check if pre-survey is completed
-    const canAccess = currentParticipantProgress?.pre_survey_completed || false;
+    // Pre-survey is now optional - allow access to videos regardless
+    const canAccess = true; // Always allow access
     
     // Button texts based on language
     const btnCompletedText = t.video_completed;
@@ -929,19 +953,17 @@ function createVideoCard(video, number, isCompleted, surveyCompleted) {
                         ${surveyCompleted ? `<div><small class="text-muted"><i class="bi bi-clipboard-check"></i> ${btnSurveyText}</small></div>` : ''}
                         <button class="btn btn-outline-primary btn-sm mt-2 view-video-btn" data-video-id="${video.id}">${btnContinueText}</button>
                        </div>`
-                    : canAccess
-                        ? `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${btnStartText}</button>`
-                        : `<button class="btn btn-secondary start-video-btn" data-video-id="${video.id}" disabled title="${preSurveyRequired}">${btnStartText}</button>`
+                    : `<button class="btn btn-primary start-video-btn" data-video-id="${video.id}">${btnStartText}</button>`
                 }
             </div>
         </div>
     `;
     
-    // Add click handler for start/continue button
+    // Add click handler for start/continue button - always enabled
     const startBtn = card.querySelector('.start-video-btn');
     const viewBtn = card.querySelector('.view-video-btn');
     
-    if (startBtn && canAccess) {
+    if (startBtn) {
         startBtn.addEventListener('click', () => {
             startVideoTask(video.id);
         });
@@ -1048,16 +1070,8 @@ function setupVideoPageElements(videoNum) {
 
 // Start video task
 async function startVideoTask(videoId) {
-    // Check if pre-survey is completed
-    if (!currentParticipantProgress?.pre_survey_completed) {
-        const message = currentLanguage === 'en'
-            ? 'Please complete the pre-survey before starting video tasks.'
-            : 'Bitte vervollständigen Sie die Vor-Umfrage, bevor Sie mit den Video-Aufgaben beginnen.';
-        showAlert(message, 'warning');
-        showPage('presurvey');
-        loadSurvey('pre');
-        return;
-    }
+    // Pre-survey is now optional - allow access to videos without completing it
+    // No blocking check needed
     
     currentVideoId = videoId;
     const video = VIDEOS.find(v => v.id === videoId);
