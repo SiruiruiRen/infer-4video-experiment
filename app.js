@@ -30,14 +30,14 @@ const VIDEOS = [
     { id: 'video4', name: 'Video 4: [Name]', link: 'VIDEO_LINK_4', password: 'PASSWORD_4' }
 ];
 
-// Qualtrics Survey Links - UPDATE WITH YOUR SURVEY LINKS
+// Qualtrics Survey Links
 const QUALTRICS_SURVEYS = {
-    pre: 'YOUR_PRE_SURVEY_LINK',
-    post_video_1: 'YOUR_POST_VIDEO_1_LINK',
-    post_video_2: 'YOUR_POST_VIDEO_2_LINK',
-    post_video_3: 'YOUR_POST_VIDEO_3_LINK',
-    post_video_4: 'YOUR_POST_VIDEO_4_LINK',
-    post: 'YOUR_FINAL_POST_SURVEY_LINK'
+    pre: 'https://unc.az1.qualtrics.com/jfe/form/SV_9XLC3Bd1eQfu2p0',
+    post_video_1: 'https://unc.az1.qualtrics.com/jfe/form/SV_aWTs9RvswqAWyVg',
+    post_video_2: 'https://unc.az1.qualtrics.com/jfe/form/SV_aWTs9RvswqAWyVg',
+    post_video_3: 'https://unc.az1.qualtrics.com/jfe/form/SV_aWTs9RvswqAWyVg',
+    post_video_4: 'https://unc.az1.qualtrics.com/jfe/form/SV_aWTs9RvswqAWyVg',
+    post: 'https://unc.az1.qualtrics.com/jfe/form/SV_eretEVKsvHFFBXg'
 };
 
 // Global state
