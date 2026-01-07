@@ -120,7 +120,22 @@ ALTER TABLE reflections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE binary_classifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_events ENABLE ROW LEVEL SECURITY;
 
--- Allow anonymous access (for web app)
+-- Drop existing policies if they exist (to avoid conflicts)
+DROP POLICY IF EXISTS "Allow anonymous insert" ON participant_progress;
+DROP POLICY IF EXISTS "Allow anonymous select" ON participant_progress;
+DROP POLICY IF EXISTS "Allow anonymous update" ON participant_progress;
+
+DROP POLICY IF EXISTS "Allow anonymous insert" ON reflections;
+DROP POLICY IF EXISTS "Allow anonymous select" ON reflections;
+DROP POLICY IF EXISTS "Allow anonymous update" ON reflections;
+
+DROP POLICY IF EXISTS "Allow anonymous insert" ON binary_classifications;
+DROP POLICY IF EXISTS "Allow anonymous select" ON binary_classifications;
+
+DROP POLICY IF EXISTS "Allow anonymous insert" ON user_events;
+DROP POLICY IF EXISTS "Allow anonymous select" ON user_events;
+
+-- Create policies (fresh)
 CREATE POLICY "Allow anonymous insert" ON participant_progress FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anonymous select" ON participant_progress FOR SELECT USING (true);
 CREATE POLICY "Allow anonymous update" ON participant_progress FOR UPDATE USING (true);
