@@ -2,25 +2,52 @@
 
 ## Problem
 
-The CORS proxy at `https://tubingen-feedback-cors-proxy.onrender.com` is not allowing requests from the study sites, causing CORS errors.
+The **existing** CORS proxy at `https://tubingen-feedback-cors-proxy.onrender.com` is not allowing requests from the study sites, causing CORS errors.
 
-## Immediate Solution
+## Solution: Fix the EXISTING Proxy (Recommended)
 
-### Option 1: Fix Existing Proxy (If You Have Access)
+**You should fix the existing proxy** - no need to create a new one!
 
-If you have access to the Render dashboard for `tubingen-feedback-cors-proxy`:
+### Step 1: Access Render Dashboard
 
-1. Go to Render dashboard → Your proxy service
-2. Check the code/deployment
-3. Ensure CORS headers are set correctly:
-   ```javascript
-   Access-Control-Allow-Origin: https://infer-study-alpha.onrender.com
-   Access-Control-Allow-Methods: GET, POST, OPTIONS
-   Access-Control-Allow-Headers: Content-Type, Authorization
-   ```
-4. Redeploy the service
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Find the service named `tubingen-feedback-cors-proxy` (or similar)
+3. Click on it to view details
 
-### Option 2: Deploy New Proxy (Recommended)
+### Step 2: Check/Update the Proxy Code
+
+The proxy needs to allow CORS from your study sites. The code should include:
+
+```javascript
+// Allow requests from study sites
+app.use(cors({
+    origin: [
+        'https://infer-study-alpha.onrender.com',
+        'https://infer-study-beta.onrender.com',
+        'https://infer-study-gamma.onrender.com',
+        'https://infer-study-assignment.onrender.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+```
+
+### Step 3: Update and Redeploy
+
+1. If you have the code in a GitHub repo, update it and push
+2. If you need to update directly in Render, use the code I created in `/cors-proxy-server/server.js` as a reference
+3. Redeploy the service on Render
+
+### Step 4: Verify
+
+After redeploying, test from your study site - the CORS errors should be gone.
+
+---
+
+## Alternative: If You Can't Access the Existing Proxy
+
+### Option 2: Deploy New Proxy (Only if you can't fix the existing one)
 
 I've created a new proxy server code in `/cors-proxy-server/` directory.
 
