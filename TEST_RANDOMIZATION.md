@@ -12,7 +12,9 @@ The randomization system assigns students to one of three groups based **ONLY on
 1. **Assignment is based ONLY on `student_id`** - not `anonymous_id`
 2. **Case-insensitive matching** - "ABC123" and "abc123" are treated as the same
 3. **Persistent assignment** - Once assigned, the same student always gets the same group
-4. **Random assignment** - New students are randomly assigned to one of three groups
+4. **Balanced assignment** - New students are assigned to the group with the **fewest members** to ensure even distribution
+   - If multiple groups have the same minimum count, randomly chooses among them
+   - Falls back to pure random if database query fails
 
 ## How to Test
 
@@ -29,10 +31,10 @@ SELECT * FROM student_assignments WHERE student_id = 'test123';
 SELECT * FROM student_assignments WHERE student_id = 'TEST123';
 ```
 
-### 2. Test Randomization Distribution
+### 2. Test Balanced Distribution
 
 ```sql
--- Check distribution of assignments
+-- Check distribution of assignments (should be relatively balanced)
 SELECT 
     treatment_group,
     COUNT(*) as count,
@@ -40,6 +42,21 @@ SELECT
 FROM student_assignments
 GROUP BY treatment_group
 ORDER BY treatment_group;
+
+-- Check distribution balance (difference between max and min)
+WITH group_counts AS (
+    SELECT 
+        treatment_group,
+        COUNT(*) as count
+    FROM student_assignments
+    GROUP BY treatment_group
+)
+SELECT 
+    MAX(count) as max_count,
+    MIN(count) as min_count,
+    MAX(count) - MIN(count) as difference,
+    ROUND(100.0 * (MAX(count) - MIN(count)) / MAX(count), 2) as imbalance_percentage
+FROM group_counts;
 ```
 
 ### 3. Test Assignment Persistence
